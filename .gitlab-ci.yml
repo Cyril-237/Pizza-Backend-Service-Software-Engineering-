@@ -1,0 +1,318 @@
+.build_container_image:
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [ '' ]
+  variables:
+    DOCKERFILE_LOCATION: 'unset'
+    CONTAINER_NAME: 'unset'
+    TAG_NAME: 'unset'
+  script:
+    - mkdir -p /kaniko/.docker
+    - echo "DOCKERFILE_LOCATION" $DOCKERFILE_LOCATION
+    - echo "CONTAINER_NAME" $CONTAINER_NAME
+    - echo "TAG_NAME" $TAG_NAME
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+    - |
+      if [[ "$CREATE_LATEST_TAG" == "true" ]];
+      then
+      /kaniko/executor --context $CI_PROJECT_DIR --cache=true --dockerfile $DOCKERFILE_LOCATION --destination $CI_REGISTRY_IMAGE/$CONTAINER_NAME:$TAG_NAME --destination    $CI_REGISTRY_IMAGE/$CONTAINER_NAME:latest 
+      else
+      /kaniko/executor --context $CI_PROJECT_DIR --cache=true --dockerfile $DOCKERFILE_LOCATION --destination $CI_REGISTRY_IMAGE/$CONTAINER_NAME:$TAG_NAME;
+      fi
+
+stages:
+  - print_readme
+  - commit
+  - acceptance
+  - release
+
+##################################################
+# Tasks of "generate"- Stage
+##################################################
+print_readme:
+  stage: print_readme
+  variables:
+    GIT_STRATEGY: none
+  script:
+    - echo + Sonarqube Link "$sonarqube_link" +  Sonarqube Username "$sonarqube_user" + Sonarqube Password "$sonarqube_pass"
+    - echo + Graylog Link "$graylog_link" +  Graylog Username "$graylog_user" + Graylog Password "$graylog_pass"
+    - echo + Kubernetes Dashboard Link "$dashboard_link" +  Kubernetes Dashboard Token "$dashboard_token"
+  rules:
+    - if: $CI_COMMIT_BRANCH                            # branch pipelines
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" # merge request pipelines
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH    # main pipeline
+
+variables:
+  DEVELOPMENT_CONTAINER_NAME: 'development-container'
+  DEVELOPMENT_CONTAINER_TAG: "${CI_COMMIT_BRANCH}_${CI_COMMIT_SHORT_SHA}"
+  RELEASE_CONTAINER_NAME: 'release-container'
+  RELEASE_CONTAINER_TAG: "${CI_COMMIT_BRANCH}_${CI_COMMIT_SHORT_SHA}"
+
+create_development_container_image:
+  stage: commit
+  extends:
+    - .build_container_image
+  variables:
+    DOCKERFILE_LOCATION: $CI_PROJECT_DIR/infra/build_artifacts/development.dockerfile
+    CONTAINER_NAME: $DEVELOPMENT_CONTAINER_NAME
+    TAG_NAME: $DEVELOPMENT_CONTAINER_TAG
+    CREATE_LATEST_TAG: 'true'
+    GIT_DEPTH: 1
+  rules:
+    - if: $CI_COMMIT_BRANCH                            # branch pipelines
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" # merge request pipelines
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH    # main pipeline
+    - if: $CI_PIPELINE_SOURCE == "schedule"            # exclude scheduled pipelines
+      when: never
+
+ruff_checking:
+  stage: commit
+  needs:
+    - create_development_container_image
+  image:
+    name: $CI_REGISTRY_IMAGE/$DEVELOPMENT_CONTAINER_NAME:$DEVELOPMENT_CONTAINER_TAG
+    entrypoint: [ "" ]
+  variables:
+    GIT_DEPTH: 1
+  script:
+    - ruff check app/ tests/
+  allow_failure: false
+  rules:
+    - if: $CI_COMMIT_BRANCH                            # branch pipelines
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" # merge request pipelines
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH    # main pipeline
+    - if: $CI_PIPELINE_SOURCE == "schedule"            # exclude scheduled pipelines
+      when: never
+
+integration_testing:
+  stage: commit
+  image:
+    name: $CI_REGISTRY_IMAGE/$DEVELOPMENT_CONTAINER_NAME:$DEVELOPMENT_CONTAINER_TAG
+    entrypoint: [ "" ]
+  needs:
+    - create_development_container_image
+  services:
+   - name: postgres:15.0-alpine
+     alias: db-dev
+  variables:
+    DATABASE_HOST: db-dev # Should be the same name as the 'alias' in the service section
+    DATABASE_PORT: 5432
+    DATABASE_USERNAME: postgres
+    DATABASE_PASSWORD: mysecretpassword
+    DATABASE_NAME: postgres
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: mysecretpassword
+    POSTGRES_DB: postgres
+  before_script:
+    - PYTHONPATH=. alembic upgrade head
+  script:
+    - PYTHONPATH=. pytest -x --junitxml=report_integration_tests.xml --cov=app --cov-config=.coveragerc --cov-report=xml:integration_coverage.xml tests/integration/
+  allow_failure: false
+  rules:
+    - if: $CI_COMMIT_BRANCH                            # branch pipelines
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" # merge request pipelines
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH    # main pipeline
+    - if: $CI_PIPELINE_SOURCE == "schedule"            # exclude scheduled pipelines
+      when: never
+  artifacts:
+    reports:
+      junit: report_integration_tests.xml
+    paths:
+      - integration_coverage.xml
+
+sonarqube-check:
+  stage: commit
+  image:
+    name: sonarsource/sonar-scanner-cli:latest
+    entrypoint: [""]
+  needs:
+    - integration_testing
+  variables:
+    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar" # Defines the location of the analysis task cache
+    GIT_DEPTH: "0" # Tells git to fetch all the branches of the project, required by the analysis task
+  cache:
+    key: "${CI_JOB_NAME}"
+    paths:
+      - .sonar/cache
+  script:
+    - sonar-scanner
+  allow_failure: false
+  rules:
+    - if: $CI_COMMIT_BRANCH                            # branch pipelines
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" # merge request pipelines
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH    # main pipeline
+    - if: $CI_PIPELINE_SOURCE == "schedule"            # exclude scheduled pipelines
+      when: never
+
+create_release_candidate:
+  stage: acceptance
+  extends:
+    - .build_container_image
+  variables:
+    DOCKERFILE_LOCATION: $CI_PROJECT_DIR/infra/build_artifacts/release.dockerfile
+    CONTAINER_NAME: $RELEASE_CONTAINER_NAME
+    TAG_NAME: $RELEASE_CONTAINER_TAG
+    CREATE_LATEST_TAG: 'true'
+    GIT_DEPTH: 1
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" # merge request pipelines
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH    # main pipeline
+    - if: $CI_PIPELINE_SOURCE == "schedule"            # exclude scheduled pipelines
+      when: never
+
+deploy_application_to_staging:
+  stage: acceptance
+  needs:
+    - create_release_candidate
+  image:
+    name: dtzar/helm-kubectl:3.10.3
+    entrypoint: [ '' ]
+  variables:
+    GIT_DEPTH: 1
+  before_script:
+    - cp infra/deployment/deployment-staging.yaml final-deployment-staging.yaml
+    - sed -i "s|enter_release_containter_registry_url|$CI_REGISTRY_IMAGE/$RELEASE_CONTAINER_NAME:latest|g" final-deployment-staging.yaml
+    - cp infra/deployment/kubeconfig final-kubeconfig
+    - sed -i "s|enter_instace_url|$team_instance_link|g" final-kubeconfig
+    - sed -i "s|enter_kubernetes_token|$dashboard_token|g" final-kubeconfig
+  script:
+    - kubectl delete deployment stagingcontainer --ignore-not-found=true --namespace staging --kubeconfig=final-kubeconfig
+    - kubectl delete service stagingcontainer-service --ignore-not-found=true --namespace staging  --kubeconfig=final-kubeconfig
+    - kubectl apply -f final-deployment-staging.yaml --kubeconfig=final-kubeconfig
+    - rm final-deployment-staging.yaml
+    - rm final-kubeconfig
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      when: manual
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: manual
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: never
+
+smoke_testing_staging:
+  stage: acceptance
+  variables:
+    API_SERVER: $team_instance_link
+    API_PORT: 30080
+    GIT_DEPTH: 1
+  needs:
+    - deploy_application_to_staging
+  before_script:
+    - apt-get update && apt-get install -y curl
+  script:
+    - chmod +x $CI_PROJECT_DIR/infra/build_artifacts/smoke.sh
+    - $CI_PROJECT_DIR/infra/build_artifacts/smoke.sh
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" # merge request pipelines
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH    # main pipeline
+    - if: $CI_PIPELINE_SOURCE == "schedule"            # exclude scheduled pipelines
+      when: never
+
+migrate_database_in_staging:
+  stage: acceptance
+  needs:
+    - smoke_testing_staging
+  image:
+    name: dtzar/helm-kubectl:3.10.3
+    entrypoint: [ '' ]
+  variables:
+    GITH_DEPTH: 1
+  before_script:
+    - cp infra/deployment/kubeconfig final-kubeconfig
+    - sed -i "s|enter_instace_url|$team_instance_link|g" final-kubeconfig
+    - sed -i "s|enter_kubernetes_token|$dashboard_token|g" final-kubeconfig
+  script:
+    - export POD_NAME=`kubectl --kubeconfig=final-kubeconfig get pods --namespace staging --no-headers -l app=stagingcontainer -o custom-columns=":metadata.name"`
+    - kubectl --kubeconfig=final-kubeconfig exec $POD_NAME --namespace staging -- env PYTHONPATH=. alembic upgrade head
+    - rm final-kubeconfig
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" # merge request pipelines
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH    # main pipeline
+    - if: $CI_PIPELINE_SOURCE == "schedule"            # exclude scheduled pipelines
+      when: never
+
+service_testing:
+  stage: acceptance
+  image:
+    name: $CI_REGISTRY_IMAGE/$DEVELOPMENT_CONTAINER_NAME:$DEVELOPMENT_CONTAINER_TAG
+    entrypoint: [ "" ]
+  needs:
+    - migrate_database_in_staging
+  variables:
+    API_SERVER: girschick-mo2-green.se-ss25.users.h-da.cloud
+    API_PORT: 30080
+    GIT_DEPTH: 1
+  script:
+    - PYTHONPATH=. pytest --verbose --color=yes --junitxml=report_service_tests.xml tests/service/
+  allow_failure: false
+  rules:
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH      # on main branch
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"   # on merge requests
+    - if: $CI_PIPELINE_SOURCE == "schedule"              # exclude scheduled pipelines
+      when: never
+  artifacts:
+    reports:
+      junit: report_service_tests.xml
+
+deploy_application_to_production:
+  stage: release
+  image: dtzar/helm-kubectl:3.10.3
+  variables:
+    GIT_DEPTH: 1
+  before_script:
+    - cp infra/deployment/deployment-production.yaml final-deployment-production.yaml
+    - sed -i "s|enter_release_containter_registry_url|$CI_REGISTRY_IMAGE/$RELEASE_CONTAINER_NAME:latest|g" final-deployment-production.yaml
+    - cp infra/deployment/kubeconfig final-kubeconfig
+    - sed -i "s|enter_instace_url|$team_instance_link|g" final-kubeconfig
+    - sed -i "s|enter_kubernetes_token|$dashboard_token|g" final-kubeconfig
+  script:
+    - kubectl delete deployment productioncontainer --ignore-not-found=true --namespace production --kubeconfig=final-kubeconfig
+    - kubectl delete service productioncontainer-service --ignore-not-found=true --namespace production  --kubeconfig=final-kubeconfig
+    - kubectl apply -f final-deployment-production.yaml --kubeconfig=final-kubeconfig
+    - rm final-deployment-production.yaml
+    - rm final-kubeconfig
+  rules:
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH    # main pipeline
+      when: manual
+    - if: $CI_PIPELINE_SOURCE == "schedule"            # exclude scheduled pipelines
+      when: never
+
+smoke_testing_production:
+  stage: release
+  variables:
+    API_SERVER: $team_instance_link
+    API_PORT: 30081
+    GIT_DEPTH: 1
+  needs:
+    - deploy_application_to_production
+  before_script:
+    - apt-get update && apt-get install -y curl
+  script:
+    - chmod +x $CI_PROJECT_DIR/infra/build_artifacts/smoke.sh
+    - $CI_PROJECT_DIR/infra/build_artifacts/smoke.sh
+  rules:
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH    # main pipeline
+    - if: $CI_PIPELINE_SOURCE == "schedule"            # exclude scheduled pipelines
+      when: never
+
+migrate_database_in_production:
+  stage: release
+  needs:
+    - smoke_testing_production
+  image:
+    name: dtzar/helm-kubectl:3.10.3
+    entrypoint: [ '' ]
+  variables:
+    GIT_DEPTH: 1
+  before_script:
+    - cp infra/deployment/kubeconfig final-kubeconfig
+    - sed -i "s|enter_instace_url|$team_instance_link|g" final-kubeconfig
+    - sed -i "s|enter_kubernetes_token|$dashboard_token|g" final-kubeconfig
+  script:
+    - export POD_NAME=`kubectl --kubeconfig=final-kubeconfig get pods --namespace production --no-headers -l app=productioncontainer -o custom-columns=":metadata.name"`
+    - kubectl --kubeconfig=final-kubeconfig exec $POD_NAME --namespace production -- env PYTHONPATH=. alembic upgrade head
+    - rm final-kubeconfig
+  rules:
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH    # main pipeline
+    - if: $CI_PIPELINE_SOURCE == "schedule"            # exclude scheduled pipelines
+      when: never

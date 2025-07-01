@@ -1,0 +1,103 @@
+---
+
+test_name: Make sure server implements crud functionality for order endpoint
+
+includes:
+  - !include common.yaml
+  - !include ../users/user_stage.yaml
+
+stages:
+  #Create User
+  - type: ref
+    id: create_user
+
+#---------------------------Create Order---------------------------
+  #Create Order
+  - name: Verify that status code equals 201 when we create a new order and the order is returned
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order
+      method: POST
+      json:
+        user_id: "{user_id}"
+        address: &address
+          street: "{address_street:s}"
+          post_code: "{address_post_code:s}"
+          house_number: !int "{address_house_number:d}"
+          country: "{address_country:s}"
+          town: "{address_town:s}"
+          first_name: "{address_first_name:s}"
+          last_name: "{address_last_name:s}"
+    response:
+      status_code: 201
+      json:
+        order_datetime: !anything
+        id: !anything
+        user_id: !anything
+        address:
+          <<: *address
+          id: !anything
+        order_status: !anything
+      save:
+        json:
+          address_id: address.id
+          order_id: id
+          datetime: order_datetime
+          order_status: status
+
+#----------------------Test Order-----------------------------
+  #Get specific Order
+  - name: Get order with id
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{order_id}
+      method: GET
+    response:
+      status_code: 200
+      json:
+        id: "{order_id}"
+        order_datetime: "{datetime}"
+        user_id: "{user_id}"
+        address:
+          <<: *address
+          id: "{address_id}"
+        order_status: "TRANSMITTED"
+
+  #Get all Orders
+  - name: Get a list of orders
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order
+      method: GET
+    response:
+      status_code: 200
+      verify_response_with:
+        - function: tests.service.api.v1.order.testing_utils:check_for_id_in_response_list
+          extra_kwargs:
+            element_id: "{order_id}"
+
+  #Get wrong Order
+  - name: Check for status 404 if we try to get an order with a wrong id
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{not_available_id}
+      method: GET
+    response:
+      status_code: 404
+
+  #Delete wrong Order
+  - name: Check for status 404 if we try to delete an order with a wrong id
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{not_available_id}
+      method: DELETE
+    response:
+      status_code: 404
+
+#----------------------Delete Everything----------------------------
+  #Delete Order
+  - name: Delete existing order and verify 204
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{order_id}
+      method: DELETE
+    response:
+      status_code: 204
+
+  #Delete user
+  - type: ref
+    id: delete_user

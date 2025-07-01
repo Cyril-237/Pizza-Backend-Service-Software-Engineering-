@@ -1,0 +1,39 @@
+---
+
+name: User Stage
+
+description:
+  Reusable test stage for creating users
+
+variables:
+  username: "istjaklar"
+
+stages:
+  #Create User
+  - id: create_user
+    name: Create test user
+    # max_retries and delay_after needs to be set in first stage of each stage to wait for uvicorn
+    max_retries: 10
+    delay_after: 2
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/users
+      json:
+        username: "{username:s}"
+      method: POST
+    response:
+      status_code: 201
+      json:
+        username: "{username:s}"
+        id: !anything
+      save:
+        json:
+          user_id: id
+
+  #Delete User
+  - id: delete_user
+    name: Delete test user
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/users/{user_id}
+      method: DELETE
+    response:
+      status_code: 204

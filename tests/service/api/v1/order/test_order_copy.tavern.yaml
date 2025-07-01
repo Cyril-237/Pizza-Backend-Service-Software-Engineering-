@@ -1,0 +1,241 @@
+---
+
+test_name: Make sure server implements crud functionality for order endpoint
+
+includes:
+  - !include common.yaml
+  - !include ../order/order_stage.yaml
+  - !include ../dough/dough_stage.yaml
+  - !include ../sauce/sauce_stage.yaml
+  - !include ../beverage/beverage_stage.yaml
+  - !include ../pizza_type/pizza_type_stage.yaml
+  - !include ../users/user_stage.yaml
+
+stages:
+  #-------------------Create Order and Beverage------------------------
+  #Create User
+  - type: ref
+    id: create_user
+
+  #Create Order
+  - type: ref
+    id: create_order
+
+  #Create Beverage
+  - type: ref
+    id: create_beverage
+
+  #--------------------Create everything needed for a Pizza-------------------------------
+  #Create Dough
+  - type: ref
+    id: create_dough
+
+  #Create Sauce
+  - type: ref
+    id: create_sauce
+
+  #Create pizza_type
+  - type: ref
+    id: create_pizza_type
+
+
+  #---------------------Add to first Order----------------------------------
+  #Add Pizza to Order
+  - name: Add Pizza to Order and verify 200 status code
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{order_id}/pizzas
+      method: POST
+      json:
+        pizza_type_id: "{pizza_type_id}"
+    response:
+      status_code: 200
+      json:
+        id: !anything
+      save:
+        json:
+          pizza_id: id
+
+  #Add valid Beverage to Order
+  - name: verify that status code equals 201 and the quantity and beverage_id is returned when we create a beverage order relation (add a beverage to an order)
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{order_id}/beverages
+      json: &order_cola_beverage_quantity
+        quantity: !int "{order_beverage_quantity_1:d}"
+        beverage_id: "{beverage_id}"
+      method: POST
+    response:
+      status_code: 201
+      json:
+        <<: *order_cola_beverage_quantity
+
+
+  #---------------------Copy Oder-------------------------------------------
+  #Create Order
+  - name: Verify that status code equals 201 when we create a new order and specify a copy order and the order is returned
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order?copy_order_id={order_id}
+      method: POST
+      json:
+        user_id: "{user_id}"
+        address: &address_copy
+          street: "{address_street:s}"
+          post_code: "{address_post_code:s}"
+          house_number: !int "{address_house_number:d}"
+          country: "{address_country:s}"
+          town: "{address_town:s}"
+          first_name: "{address_first_name:s}"
+          last_name: "{address_last_name:s}"
+    response:
+      status_code: 201
+      json:
+        order_datetime: !anything
+        id: !anything
+        user_id: !anything
+        address:
+          <<: *address_copy
+          id: !anything
+        order_status: !anything
+      save:
+        json:
+          address_id_copy: address.id
+          order_id_copy: id
+          datetime_copy: order_datetime
+          order_status_copy: order_status
+
+  #Create Order with wrong copy Order Id
+  - name: Verify that status code equals 404 when we create a new order and specify non exisiting copy order id
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order?copy_order_id={not_available_id}
+      method: POST
+      json:
+        user_id: "{user_id}"
+        address:
+          street: "{address_street:s}"
+          post_code: "{address_post_code:s}"
+          house_number: !int "{address_house_number:d}"
+          country: "{address_country:s}"
+          town: "{address_town:s}"
+          first_name: "{address_first_name:s}"
+          last_name: "{address_last_name:s}"
+    response:
+      status_code: 404
+
+  # Check Dough Stock
+  - name: Verify that dough stock was decreades correctly
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/doughs/{dough_id}
+      method: GET
+    response:
+      json:
+        name: "{dough_name:s}"
+        price: !float "{dough_price:f}"
+        description: "{dough_description}"
+        # Starting stock is 10. 10-1-1=8
+        stock: 8
+        id: "{dough_id}"
+
+  # Check Sauce Stock
+  - name: Verify that sauce stock was decreades correctly
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/sauces/{sauce_id}
+      method: GET
+    response:
+      json:
+        name: "{sauce_name:s}"
+        price: !float "{sauce_price:f}"
+        description: "{sauce_description}"
+        # Starting stock is 10. 10-1-1=8
+        stock: 8
+        id: "{sauce_id}"
+        type: "{sauce_type}"
+
+  #Check beverage stock
+  - name: Verify that beverage stock was decreades correctly
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/beverages/{beverage_id}
+      method: GET
+    response:
+      status_code: 200
+      json:
+        name: "{beverage_name:s}"
+        price: !float "{beverage_price:f}"
+        description: "{beverage_description}"
+        # Starting stock is 10. every order has quantity 4: 10-4-4= 2
+        stock: 2
+        id: "{beverage_id}"
+
+  # Reduce Dough Stock to 0
+  - name: Update dough stock to 0
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/doughs/{dough_id}
+      method: PUT
+      json:
+        name: "{dough_name:s}"
+        price: !float "{dough_price:f}"
+        description: "{dough_description}"
+        stock: 0
+
+  # Reduce Sauce Stock to 0
+  - name: Update sauce stock to 0
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/sauces/{sauce_id}
+      method: PUT
+      json:
+        name: "{sauce_name:s}"
+        price: !float "{sauce_price:f}"
+        description: "{sauce_description}"
+        stock: 0
+        type: "{sauce_type}"
+
+  #Create Order
+  - name: Verify that status code equals 409 when we create a new order and specify a copy order with insufficient stock left
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order?copy_order_id={order_id}
+      method: POST
+      json:
+        user_id: "{user_id}"
+        address:
+          street: "{address_street:s}"
+          post_code: "{address_post_code:s}"
+          house_number: !int "{address_house_number:d}"
+          country: "{address_country:s}"
+          town: "{address_town:s}"
+          first_name: "{address_first_name:s}"
+          last_name: "{address_last_name:s}"
+    response:
+      status_code: 409
+
+
+  #---------------------Delete Everything-----------------------------------
+
+  #Delete Copied Order
+  - name: Delete existing copied order and verify 204
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{order_id_copy}
+      method: DELETE
+    response:
+      status_code: 204
+
+  #Delete Order
+  - type: ref
+    id: delete_order
+
+  #Delete Beverage
+  - type: ref
+    id: delete_beverage
+
+  #Delete pizza_type
+  - type: ref
+    id: delete_pizza_type
+
+  #Delete Dough
+  - type: ref
+    id: delete_dough
+
+  #Delete Sauce
+  - type: ref
+    id: delete_sauce
+
+  #Delete user
+  - type: ref
+    id: delete_user

@@ -1,0 +1,145 @@
+---
+
+test_name: Make sure server implements crud functionality for topping endpoint
+
+includes:
+  - !include common.yaml
+
+
+stages:
+  - name: Verify that status code equals 201 when we create a new topping and the topping is returned
+    # max_retries and delay_after needs to be set in first stage of each stage to wait for uvicorn
+    max_retries: 10
+    delay_after: 2
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/toppings
+      json: &salami_topping
+        name: "{topping_name:s}"
+        price: !float "{topping_price:f}"
+        description: "{topping_description}"
+        stock: !int "{topping_stock:d}"
+      method: POST
+    response:
+      status_code: 201
+      json:
+        <<: *salami_topping
+        id: !anything
+      save:
+        json:
+          topping_id: id
+
+  - name: Verify that status code equals 303 and we get a redirect to an already existing item, when we create a new topping with a name that already exists
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/toppings
+      json:
+        name: "{topping_name:s}"
+        price: 9.99
+        description: "My new topping"
+        stock: 300
+      method: POST
+    response:
+      status_code: 303
+      headers:
+        location: "http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/toppings/{topping_id}"
+
+  - name: Get topping with id
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/toppings/{topping_id}
+      method: GET
+    response:
+      status_code: 200
+      json: &salami_with_topping
+        <<: *salami_topping
+        id: "{topping_id}"
+
+  #Get wrong Topping
+  - name: Check for status 404 if we try to get an topping with a wrong id
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/toppings/00000000-0000-0000-0000-000000000000
+      method: GET
+    response:
+      status_code: 404
+
+  - name: Get a list of toppings
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/toppings
+      method: GET
+    response:
+      status_code: 200
+      json: !anylist
+        id: "{topping_id}"
+        name: "{topping_name:s}"
+        price: !float "{topping_price:f}"
+        description: "{topping_description}"
+
+
+  - name: Update topping
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/toppings/{topping_id}
+      method: PUT
+      json:
+        <<: *salami_topping
+        description: "My new description"
+    response:
+      status_code: 204
+
+  - name: Check if a new topping is created when topping gets a new name and name does not already exists
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/toppings/{topping_id}
+      method: PUT
+      json:
+        <<: *salami_topping
+        name: "Cheese"
+    response:
+      status_code: 201
+      json:
+        <<: *salami_topping
+        id: !anything
+        name: "Cheese"
+      save:
+        json:
+          cheese_id: id
+
+  - name: Check for status 303 if we update topping to an already existing name
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/toppings/{topping_id}
+      method: PUT
+      json:
+        <<: *salami_topping
+        name: "Cheese"
+    response:
+      status_code: 303
+      headers:
+        location: "http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/toppings/{cheese_id}"
+
+  - name: Check for status 404 if we update with a non existing id
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/toppings/00000000-0000-0000-0000-000000000000
+      method: PUT
+      json:
+        <<: *salami_topping
+        name: "Cheese"
+    response:
+      status_code: 404
+
+  #Delete wrong Topping
+  - name: Check for status 404 if we delete with a non existing id
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/toppings/00000000-0000-0000-0000-000000000000
+      method: DELETE
+    response:
+      status_code: 404
+
+  - name: Delete first created topping with id
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/toppings/{topping_id}
+      method: DELETE
+    response:
+      status_code: 204
+
+  - name: Delete second created topping with id
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/toppings/{cheese_id}
+      method: DELETE
+    response:
+      status_code: 204

@@ -1,0 +1,10 @@
+---
+
+name: Common
+description: common test information
+
+variables:
+  dough_name: "Whole Grain"
+  dough_price: 1.50
+  dough_description: "Test Dough"
+  dough_stock: 10

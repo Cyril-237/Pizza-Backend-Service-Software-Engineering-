@@ -1,0 +1,41 @@
+---
+
+name: Dough stage
+
+description:
+  Reusable test stage for creating doughs
+
+variables:
+  dough_name: "classic"
+  dough_price: 1.50
+  dough_description: "Test Dough"
+  dough_stock: 10
+
+stages:
+
+  - id: create_dough
+    name: create the test dough
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/doughs
+      json: &dough
+        name: "{dough_name:s}"
+        price: !float "{dough_price:f}"
+        description: "{dough_description}"
+        stock: !int "{dough_stock:d}"
+      method: POST
+    response:
+        status_code: 201
+        json:
+          <<: *dough
+          id: !anything
+        save:
+          json:
+            dough_id: id
+
+  - id: delete_dough
+    name: Delete dough with id
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/doughs/{dough_id}
+      method: DELETE
+    response:
+      status_code: 204

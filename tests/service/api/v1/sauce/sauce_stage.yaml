@@ -1,0 +1,43 @@
+---
+
+name: Sauce stage
+
+description:
+  Reusable test stage for creating sauces
+
+variables:
+  sauce_name: "classic"
+  sauce_price: 1.50
+  sauce_description: "Test Sauce"
+  sauce_stock: 10
+  sauce_type: "SPICY"
+
+stages:
+
+  - id: create_sauce
+    name: create the test sauce
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/sauces
+      json: &sauce
+        name: "{sauce_name:s}"
+        price: !float "{sauce_price:f}"
+        description: "{sauce_description}"
+        stock: !int "{sauce_stock:d}"
+        type: "{sauce_type}"
+      method: POST
+    response:
+        status_code: 201
+        json:
+          <<: *sauce
+          id: !anything
+        save:
+          json:
+            sauce_id: id
+
+  - id: delete_sauce
+    name: Delete sauce with id
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/sauces/{sauce_id}
+      method: DELETE
+    response:
+      status_code: 204

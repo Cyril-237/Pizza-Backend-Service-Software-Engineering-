@@ -1,0 +1,111 @@
+---
+
+test_name: Make sure server implements functionality for editing order status correctly
+
+includes:
+  - !include common.yaml
+  - !include ../users/user_stage.yaml
+
+stages:
+  #Create User
+  - type: ref
+    id: create_user
+
+  - name: Verify that status code equals 201 when we create a new order and the order is returned
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order
+      method: POST
+      json:
+        user_id: "{user_id}"
+        address: &address
+          street: "{address_street:s}"
+          post_code: "{address_post_code:s}"
+          house_number: !int "{address_house_number:d}"
+          country: "{address_country:s}"
+          town: "{address_town:s}"
+          first_name: "{address_first_name:s}"
+          last_name: "{address_last_name:s}"
+    response:
+      status_code: 201
+      json: &order
+        order_datetime: !anything
+        id: !anything
+        user_id: !anything
+        address:
+          <<: *address
+          id: !anything
+        order_status: !anything
+      save:
+        json:
+          address_id: address.id
+          order_id: id
+          datetime: order_datetime
+          order_status: order_status
+
+  - name: Get order with id
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{order_id}
+      method: GET
+    response:
+      status_code: 200
+      json:
+        id: "{order_id}"
+        order_datetime: "{datetime}"
+        user_id: "{user_id}"
+        order_status: "{order_status}"
+        address:
+          <<: *address
+          id: "{address_id}"
+
+  - name: update order status and verify 204 with correct status "TRANSMITTED"
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{order_id}/status?status=TRANSMITTED
+      method: PUT
+    response:
+      status_code: 204
+
+  - name: update order status and verify 204 with correct status "PREPARING"
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{order_id}/status?status=PREPARING
+      method: PUT
+    response:
+      status_code: 204
+
+  - name: update order status and verify 204 with correct status "IN_DELIVERY"
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{order_id}/status?status=IN_DELIVERY
+      method: PUT
+    response:
+      status_code: 204
+
+  - name: update order status and verify 204 with correct status "COMPLETED"
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{order_id}/status?status=COMPLETED
+      method: PUT
+    response:
+      status_code: 204
+
+  - name: update order status and verify 422 with incorrect status "NOPENOPENOPE"
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{order_id}/status?status=NOPENOPENOPE
+      method: PUT
+    response:
+      status_code: 422
+
+  - name: update order status and verify 404 with correct status "TRANSMITTED" and non existing order id
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/00000000-0000-0000-0000-000000000000/status?status=TRANSMITTED
+      method: PUT
+    response:
+      status_code: 404
+
+  - name: Delete existing order and verify 204
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{order_id}
+      method: DELETE
+    response:
+      status_code: 204
+
+  #Delete user
+  - type: ref
+    id: delete_user

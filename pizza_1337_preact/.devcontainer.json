@@ -1,0 +1,19 @@
+{
+   "build": {
+        "dockerfile" : "../infra/build_artifacts/development_typescript.dockerfile"
+    },
+"runArgs": [
+   "--network=host"
+],
+"customizations": {
+   "vscode": {
+      "extensions": [
+         "ryanluker.vscode-coverage-gutters"
+      ]
+   }
+},
+}
+
+// not needed: export CHROME_EXECUTABLE="http://host.docker.internal:9222"
+// The following command will open a port and offer a location to access the web-server ... (hot reload is supported):
+//    flutter run -d web-server 

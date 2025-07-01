@@ -1,0 +1,35 @@
+---
+
+name: Common
+description: common test information
+
+variables:
+  quantity: 5
+  not_available_id: "00000000-0000-0000-0000-000000000000"
+
+  order_price_pizza: 5
+  order_beverage_quantity_1: 4
+  order_price_beverage_1: 11.96
+  order_beverage_quantity_2: 2
+  order_price_beverage_2: 5.98
+  invalid_order_beverage_quantity: 16
+  invalid_order_beverage_quantity_2: 0
+
+
+  address_street: "Schöfferstraße"
+  address_post_code: "64295"
+  address_fake_street: "Yeet"
+  address_house_number: 3
+  address_country: "Deutschland"
+  address_town: "Darmstadt"
+  address_first_name: "Rainer"
+  address_last_name: "Zufall"
+
+
+  topping1_quantity: 2
+  topping2_quantity: 1
+
+  cold: false
+
+  price_no_toppings: 3
+  price_2_toppings: 5

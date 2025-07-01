@@ -1,0 +1,10 @@
+---
+
+name: Common
+description: common test information
+
+variables:
+  beverage_name: "Cola"
+  beverage_price: 2.99
+  beverage_description: "Coca Cola Company"
+  beverage_stock: 15

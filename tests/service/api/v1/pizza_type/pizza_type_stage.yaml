@@ -1,0 +1,43 @@
+---
+
+name: Pizza_type stage
+
+description:
+  Reusable test stage for creating doughs
+
+variables:
+  pizza_name: "Mozzarella"
+  pizza_price: 5
+  pizza_description: "Italian quality"
+
+stages:
+
+  - id: create_pizza_type
+    name: create the test pizza_type
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/pizza-types
+      json:
+        name: "{pizza_name:s}"
+        price: !float "{pizza_price:f}"
+        description: "{pizza_description}"
+        dough_id: "{dough_id}"
+        sauce_id: "{sauce_id}"
+      method: POST
+    response:
+      status_code: 201
+      json:
+        name: "{pizza_name:s}"
+        price: !float "{pizza_price:f}"
+        description: "{pizza_description}"
+        id: !anything
+      save:
+        json:
+          pizza_type_id: id
+
+  - id: delete_pizza_type
+    name: Delete pizza_type with id
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/pizza-types/{pizza_type_id}
+      method: DELETE
+    response:
+      status_code: 204

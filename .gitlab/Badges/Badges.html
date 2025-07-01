@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="de">  
+<head>
+    <meta charset="UTF-8" />
+    <title>Badges for GitLab</title>
+	<script>
+	function CopyTextToClipboard(myImg) {
+		"use strict";
+	  /* Select the text field */
+	  let myText = myImg.src;
+
+	  let inputText=document.getElementById("myInput");
+
+	  inputText.value=myText;
+	  
+	  DisplayInput();
+	  
+	  inputText.select();
+	  inputText.setSelectionRange(0, 99999); /*For mobile devices*/
+
+	  /* Copy the text inside the text field */
+      navigator.clipboard.writeText(inputText.value);
+
+	}
+	function DisplayInput() {
+		"use strict";
+		let s= document.getElementById("myInput");
+		s.style.display = "block";
+		window.setTimeout (HideInput, 1200);
+	}
+	function HideInput() {
+		"use strict";
+		let s= document.getElementById("myInput");
+		s.value="";
+		s.style.display = "none";
+	}
+	</script>
+</head>
+<body>
+<header>
+<h1>Copy the Badges for GitLab-Projects</h1>
+</header>
+<main>
+<p>Maintainers or owners of the project may attach badges to projects in GitLab. (Developers may not!)</p>
+<p> To Do so please copy the desired URL into the clipboard by clicking on the desired badge. Paste it in the settings of the projects in the section called badges.</p>
+
+<!-- The button used to copy the text -->
+<p>
+<img src="https://img.shields.io/badge/Prak1-Fail-red" alt="" onclick="CopyTextToClipboard(this)">
+<img src="https://img.shields.io/badge/Prak1-OK-yellow" alt="" onclick="CopyTextToClipboard(this)">
+<img src="https://img.shields.io/badge/Prak1-Good-green" alt="" onclick="CopyTextToClipboard(this)">
+</p>
+<p>
+<img src="https://img.shields.io/badge/Prak2-Fail-red" alt="" onclick="CopyTextToClipboard(this)">
+<img src="https://img.shields.io/badge/Prak2-OK-yellow" alt="" onclick="CopyTextToClipboard(this)">
+<img src="https://img.shields.io/badge/Prak2-Good-green" alt="" onclick="CopyTextToClipboard(this)">
+</p>
+<p>
+<img src="https://img.shields.io/badge/Prak3-Fail-red" alt="" onclick="CopyTextToClipboard(this)">
+<img src="https://img.shields.io/badge/Prak3-OK-yellow" alt="" onclick="CopyTextToClipboard(this)">
+<img src="https://img.shields.io/badge/Prak3-Good-green" alt="" onclick="CopyTextToClipboard(this)">
+</p>
+<p>
+<img src="https://img.shields.io/badge/Prak4-Fail-red" alt="" onclick="CopyTextToClipboard(this)">
+<img src="https://img.shields.io/badge/Prak4-OK-yellow" alt="" onclick="CopyTextToClipboard(this)">
+<img src="https://img.shields.io/badge/Prak4-Good-green" alt="" onclick="CopyTextToClipboard(this)">
+</p>
+<p>
+<img src="https://img.shields.io/badge/Prak5-Fail-red" alt="" onclick="CopyTextToClipboard(this)">
+<img src="https://img.shields.io/badge/Prak5-OK-yellow" alt="" onclick="CopyTextToClipboard(this)">
+<img src="https://img.shields.io/badge/Prak5-Good-green" alt="" onclick="CopyTextToClipboard(this)">
+</p>
+<p>
+<img src="https://img.shields.io/badge/Prak6-Fail-red" alt="" onclick="CopyTextToClipboard(this)">
+<img src="https://img.shields.io/badge/Prak6-OK-yellow" alt="" onclick="CopyTextToClipboard(this)">
+<img src="https://img.shields.io/badge/Prak6-Good-green" alt="" onclick="CopyTextToClipboard(this)">
+</p>
+<p>
+<img src="https://img.shields.io/badge/Prak7-Fail-red" alt="" onclick="CopyTextToClipboard(this)">
+<img src="https://img.shields.io/badge/Prak7-OK-yellow" alt="" onclick="CopyTextToClipboard(this)">
+<img src="https://img.shields.io/badge/Prak7-Good-green" alt="" onclick="CopyTextToClipboard(this)">
+</p>
+<p>
+<img src="https://img.shields.io/badge/Prak8-Fail-red" alt="" onclick="CopyTextToClipboard(this)">
+<img src="https://img.shields.io/badge/Prak8-OK-yellow" alt="" onclick="CopyTextToClipboard(this)">
+<img src="https://img.shields.io/badge/Prak8-Good-green" alt="" onclick="CopyTextToClipboard(this)">
+</p>
+<p>
+<img src="https://img.shields.io/badge/Prak9-Fail-red" alt="" onclick="CopyTextToClipboard(this)">
+<img src="https://img.shields.io/badge/Prak9-OK-yellow" alt="" onclick="CopyTextToClipboard(this)">
+<img src="https://img.shields.io/badge/Prak9-Good-green" alt="" onclick="CopyTextToClipboard(this)">
+</p>
+<p>
+<img src="https://img.shields.io/badge/Prak10-Fail-red" alt="" onclick="CopyTextToClipboard(this)">
+<img src="https://img.shields.io/badge/Prak10-OK-yellow" alt="" onclick="CopyTextToClipboard(this)">
+<img src="https://img.shields.io/badge/Prak10-Good-green" alt="" onclick="CopyTextToClipboard(this)">
+</p>
+    <input type="text" value="" size="50" id="myInput" style="display:none">
+    <label for="myInput" style="display:none">Input</label>
+</main>
+</body>
+</html>

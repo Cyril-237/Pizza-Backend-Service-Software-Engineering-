@@ -1,0 +1,150 @@
+---
+
+test_name: Make sure server implements crud functionality for dough endpoint
+
+includes:
+  - !include common.yaml
+
+
+stages:
+  - name: Verify that status code equals 201 when we create a new dough and the dough is returned
+    # max_retries and delay_after needs to be set in first stage of each stage to wait for uvicorn
+    max_retries: 10
+    delay_after: 2
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/doughs
+      json: &dough
+        name: "{dough_name:s}"
+        price: !float "{dough_price:f}"
+        description: "{dough_description}"
+        stock: !int "{dough_stock:d}"
+      method: POST
+    response:
+      status_code: 201
+      json:
+        <<: *dough
+        id: !anything
+      save:
+        json:
+          dough_id: id
+
+  - name: Verify that status code equals 303 and we get a redirect to an already existing item, when we create a new dough with a name that already exists
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/doughs
+      json:
+        name: "{dough_name:s}"
+        price: 9.99
+        description: "My new dough"
+        stock: 300
+      method: POST
+    response:
+      status_code: 303
+      headers:
+        location: "http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/doughs/{dough_id}"
+
+  #Get wrong Dough
+  - name: Check for status 404 if we try to get an dough with a wrong id
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/doughs/00000000-0000-0000-0000-000000000000
+      method: GET
+    response:
+      status_code: 404
+
+  #Get specific Dough
+  - name: Get dough with id
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/doughs/{dough_id}
+      method: GET
+    response:
+      status_code: 200
+      json: &another_dough
+        <<: *dough
+        id: "{dough_id}"
+
+  #Get all Doughs
+  - name: Get a list of doughs
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/doughs
+      method: GET
+    response:
+      status_code: 200
+      json: !anylist
+        id: "{dough_id}"
+        name: "{dough_name:s}"
+        price: !float "{dough_price:f}"
+        description: "{dough_description}"
+
+
+  - name: Update dough
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/doughs/{dough_id}
+      method: PUT
+      json:
+        <<: *dough
+        description: "My new description"
+    response:
+      status_code: 204
+
+  - name: Check if a new dough is created when dough gets a new name and name does not already exists
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/doughs/{dough_id}
+      method: PUT
+      json:
+        <<: *dough
+        name: "Italian Style"
+    response:
+      status_code: 201
+      json:
+        <<: *dough
+        id: !anything
+        name: "Italian Style"
+      save:
+        json:
+          italian_id: id
+
+  - name: Check for status 303 if we update dough to an already existing name
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/doughs/{dough_id}
+      method: PUT
+      json:
+        <<: *dough
+        name: "Italian Style"
+    response:
+      status_code: 303
+      headers:
+        location: "http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/doughs/{italian_id}"
+
+  - name: Check for status 404 if we update with a non existing id
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/doughs/00000000-0000-0000-0000-000000000000
+      method: PUT
+      json:
+        <<: *dough
+        name: "Italian Style"
+    response:
+      status_code: 404
+
+  #Delete wrong Dough
+  - name: Check for status 404 when trying to delete a non existent dough
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/doughs/00000000-0000-0000-0000-000000000000
+      method: DELETE
+    response:
+      status_code: 404
+
+#----------------------Delete Everything----------------------------
+  #Delete Dough
+  - name: Delete first created dough with id
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/doughs/{dough_id}
+      method: DELETE
+    response:
+      status_code: 204
+  #Delete Dough
+  - name: Delete second created dough with id
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/doughs/{italian_id}
+      method: DELETE
+    response:
+      status_code: 204
+

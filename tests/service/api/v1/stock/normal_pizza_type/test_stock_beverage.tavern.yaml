@@ -1,0 +1,166 @@
+---
+
+test_name: Make sure server implements stock logic for beverage
+
+includes:
+  - !include common.yaml
+  - !include ../../order/order_stage.yaml
+  - !include ../../beverage/beverage_stage.yaml
+  - !include ../../users/user_stage.yaml
+
+stages:
+  #-------------------Create Order and Beverage------------------------
+  #Create User
+  - type: ref
+    id: create_user
+
+  #Create Order
+  - type: ref
+    id: create_order
+
+  #Create Beverage
+  - type: ref
+    id: create_beverage
+
+
+  #----------------------Test Insufficient Stock------------------------
+
+  #Add valid Beverage to Order
+  - name: verify that status code equals 409 when creating a beverage order relation with insufficient stock
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{order_id}/beverages
+      json: &order_cola_beverage_quantity
+        quantity: !int "{quantity_more_than_stock:d}"
+        beverage_id: "{beverage_id}"
+      method: POST
+    response:
+      status_code: 409
+
+  #----------------------Test Sufficient Stock------------------------
+  #Add valid Beverage to Order
+  - name: verify that status code equals 201 and the quantity and beverage_id is returned when we create a beverage order relation with sufficient beverage stock
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{order_id}/beverages
+      json:
+        <<: *order_cola_beverage_quantity
+        quantity: !int "{quantity_less_than_stock:d}"
+        beverage_id: "{beverage_id}"
+      method: POST
+    response:
+      status_code: 201
+      json:
+        <<: *order_cola_beverage_quantity
+        quantity: !int "{quantity_less_than_stock:d}"
+        beverage_id: "{beverage_id}"
+
+  #Get ordered beverage
+  - name: verify that beverage was reduced according to the ordered quantity
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/beverages/{beverage_id}
+      method: GET
+    response:
+      status_code: 200
+      json:
+        name: "{beverage_name:s}"
+        price: !float "{beverage_price:f}"
+        description: "{beverage_description}"
+        stock: !int "{stock_left:d}"
+        id: "{beverage_id}"
+
+  #Update Beverage to too much quantity
+  - name: verify that status code equals 409 when we update a BeverageQuantity with too much quantity
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{order_id}/beverages
+      method: PUT
+      json:
+        quantity: !int "{quantity_more_than_stock:d}"
+        beverage_id: "{beverage_id}"
+    response:
+      status_code: 409
+
+  #Update Beverage stock
+  - name: verify that status code equals 200 when we update a BeverageQuantity
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{order_id}/beverages
+      method: PUT
+      json:
+        quantity: !int "{quantity_equal_to_stock:d}"
+        beverage_id: "{beverage_id}"
+    response:
+      status_code: 200
+
+  #Get ordered beverage
+  - name: verify that beverage was reduced according to the ordered quantity
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/beverages/{beverage_id}
+      method: GET
+    response:
+      status_code: 200
+      json:
+        name: "{beverage_name:s}"
+        price: !float "{beverage_price:f}"
+        description: "{beverage_description}"
+        stock: 0
+        id: "{beverage_id}"
+
+  #Update Beverage stock to zero
+  - name: verify that status code equals 422 when we update a BeverageQuantity to zero
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{order_id}/beverages
+      method: PUT
+      json:
+        quantity: 0
+        beverage_id: "{beverage_id}"
+    response:
+      status_code: 422
+
+  #Delete Beverage
+  - name: Delete existing beverage and verify 204
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{order_id}/beverages?beverage_id={beverage_id}
+      method: DELETE
+    response:
+      status_code: 204
+
+  #Add valid Beverage to Order again
+  - name: verify that status code equals 201 and the quantity and beverage_id is returned when we create a beverage order relation with sufficient beverage stock
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{order_id}/beverages
+      json:
+        <<: *order_cola_beverage_quantity
+        quantity: !int "{quantity_less_than_stock:d}"
+        beverage_id: "{beverage_id}"
+      method: POST
+    response:
+      status_code: 201
+      json:
+        <<: *order_cola_beverage_quantity
+        quantity: !int "{quantity_less_than_stock:d}"
+        beverage_id: "{beverage_id}"
+
+  #Delete Order
+  - type: ref
+    id: delete_order
+
+  #Delete user
+  - type: ref
+    id: delete_user
+
+  #Check beverage
+  - name: verify that beverage was increased to the original amount after deleting order
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/beverages/{beverage_id}
+      method: GET
+    response:
+      status_code: 200
+      json:
+        name: "{beverage_name:s}"
+        price: !float "{beverage_price:f}"
+        description: "{beverage_description}"
+        stock: !int "{stock_base:d}"
+        id: "{beverage_id}"
+
+  #----------------------Delete everything------------------------
+  #Delete Beverage
+  - type: ref
+    id: delete_beverage

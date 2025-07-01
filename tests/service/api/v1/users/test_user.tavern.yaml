@@ -1,0 +1,189 @@
+---
+
+test_name: Make sure server implements crud functionality for user endpoint
+
+includes:
+  - !include common.yaml
+
+stages:
+  #Create User
+  - id: create_user
+    name: Verify that status code equals 201 when we create a new user and the user is returned
+    # max_retries and delay_after needs to be set in first stage of each stage to wait for uvicorn
+    max_retries: 10
+    delay_after: 2
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/users
+      json:
+        username: "{testUsername:s}"
+      method: POST
+    response:
+      status_code: 201
+      json:
+        username: "{testUsername:s}"
+        id: !anything
+      save:
+        json:
+          test_user_id: id
+
+  - name: Verify that status code equals 201 when we create a new dough and the dough is returned
+    # max_retries and delay_after needs to be set in first stage of each stage to wait for uvicorn
+    max_retries: 10
+    delay_after: 2
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/doughs
+      json: &dough
+        name: "{dough_name:s}"
+        price: !float "{dough_price:f}"
+        description: "{dough_description}"
+        stock: !int "{dough_stock:d}"
+      method: POST
+    response:
+      status_code: 201
+      json:
+        <<: *dough
+        id: !anything
+      save:
+        json:
+          dough_id: id
+
+  - name: Verify that status code equals 201 when we create a new sauce and the sauce is returned
+    # max_retries and delay_after needs to be set in first stage of each stage to wait for uvicorn
+    max_retries: 10
+    delay_after: 2
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/sauces
+      json: &sauce
+        name: "{sauce_name:s}"
+        price: !float "{sauce_price:f}"
+        description: "{sauce_description}"
+        stock: !int "{sauce_stock:d}"
+        type: "{sauce_type}"
+      method: POST
+    response:
+      status_code: 201
+      json:
+        <<: *sauce
+        id: !anything
+      save:
+        json:
+          sauce_id: id
+
+  - name: Verify that status code equals 201 when we create a new pizza and the pizza is returned
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/pizza-types
+      json:
+        name: "{pizza_name:s}"
+        price: !float "{pizza_price:f}"
+        description: "{pizza_description}"
+        dough_id: "{dough_id}"
+        sauce_id: "{sauce_id}"
+      method: POST
+    response:
+      status_code: 201
+      json:
+        name: "{pizza_name:s}"
+        price: !float "{pizza_price:f}"
+        description: "{pizza_description}"
+        id: !anything
+      save:
+        json:
+          pizza_type_id: id
+
+  - name: Get user with id
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/users/{test_user_id}
+      method: GET
+    response:
+      status_code: 200
+      json: &user
+        username: "{testUsername:s}"
+        id: "{test_user_id}"
+
+  #Get wrong User
+  - name: Check for status 404 if we try to get an user with a wrong id
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/users/00000000-0000-0000-0000-000000000000
+      method: GET
+    response:
+      status_code: 404
+
+  #Get specific User
+  - name: Get user with id
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/users/{test_user_id}
+      method: GET
+    response:
+      status_code: 200
+      json:
+        username: "{testUsername:s}"
+        id: "{test_user_id}"
+
+  - name: Get a list of users
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/users
+      method: GET
+    response:
+      status_code: 200
+      verify_response_with:
+        - function: tests.service.api.v1.order.testing_utils:check_for_id_in_response_list
+          extra_kwargs:
+            element_id: "{test_user_id}"
+
+  #Update st_account of a User
+  - name: Update user
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/users/{test_user_id}
+      method: PUT
+      json:
+        username: "{new_testUsername:s}"
+    response:
+      status_code: 204
+
+  - name: Check for status 404 if we update with a non existing id
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/users/00000000-0000-0000-0000-000000000000
+      method: PUT
+      json:
+        username: "{testUsername:s}"
+    response:
+      status_code: 404
+
+  #Delete wrong User
+  - name: Check for status 404 if we delete with a non existing id
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/users/00000000-0000-0000-0000-000000000000
+      method: DELETE
+    response:
+      status_code: 404
+
+
+  #----------------------Delete Everything----------------------------
+  #Delete User
+  - name: Delete first created user with id
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/users/{test_user_id}
+      method: DELETE
+    response:
+      status_code: 204
+
+  - name: Delete first created pizza with id
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/pizza-types/{pizza_type_id}
+      method: DELETE
+    response:
+      status_code: 204
+
+  - name: Delete dough with id
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/doughs/{dough_id}
+      method: DELETE
+    response:
+      status_code: 204
+
+  - name: Delete sauce with id
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/sauces/{sauce_id}
+      method: DELETE
+    response:
+      status_code: 204

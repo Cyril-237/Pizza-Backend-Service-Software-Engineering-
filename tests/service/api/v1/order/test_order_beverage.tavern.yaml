@@ -1,0 +1,230 @@
+---
+
+test_name: Make sure server implements crud functionality for beverage order relation
+
+includes:
+  - !include common.yaml
+  - !include ../order/order_stage.yaml
+  - !include ../beverage/beverage_stage.yaml
+  - !include ../users/user_stage.yaml
+
+stages:
+#-------------------Create Order and Beverage------------------------------
+  #Create User
+  - type: ref
+    id: create_user
+  #Create Order
+  - type: ref
+    id: create_order
+  #Create Beverage
+  - type: ref
+    id: create_beverage
+
+#----------------------Test Beverage Order Relation------------------------
+  #Add valid Beverage to Order
+  - name: verify that status code equals 201 and the quantity and beverage_id is returned when we create a beverage order relation (add a beverage to an order)
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{order_id}/beverages
+      json: &order_cola_beverage_quantity
+        quantity: !int "{order_beverage_quantity_1:d}"
+        beverage_id: "{beverage_id}"
+      method: POST
+    response:
+      status_code: 201
+      json:
+        <<: *order_cola_beverage_quantity
+
+  #Add Beverage with invalid quantity to Order
+  - name: verify that status code equals 422 when trying to add a beverage with an invalid quantity
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{order_id}/beverages
+      json:
+        quantity: !int "{invalid_order_beverage_quantity_2:d}"
+        beverage_id: "{beverage_id}"
+      method: POST
+    response:
+      status_code: 422
+
+  #Add Beverage to not existing Order
+  - name: verify that status code equals 404 when trying to add a beverage to a not existing order
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{not_available_id}/beverages
+      json:
+        quantity: !int "{order_beverage_quantity_1:d}"
+        beverage_id: "{beverage_id}"
+      method: POST
+    response:
+      status_code: 404
+
+  #Add not existing Beverage to Order
+  - name: verify that status code equals 404 when trying to add a not existing beverage to an order
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{order_id}/beverages
+      json:
+        quantity: !int "{order_beverage_quantity_1:d}"
+        beverage_id: "{not_available_id}"
+      method: POST
+    response:
+      status_code: 404
+
+  #Add same Beverage again
+  - name: verify that status code equals 303 and get a redirect when we try to create a beverage order relation which already exists
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{order_id}/beverages
+      json:
+        quantity: !int "{order_beverage_quantity_1:d}"
+        beverage_id: "{beverage_id}"
+      method: POST
+    response:
+      status_code: 303
+      headers:
+        location: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{order_id}/beverages
+
+  #Get all Beverages from an Order
+  - name: verify that we get status code 200 and all beverages for an order
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{order_id}/beverages
+      method: GET
+    response:
+      status_code: 200
+      json:
+        - *order_cola_beverage_quantity
+
+  #Get Beverage of wrong Order
+  - name: verify that status code equals 404 when we update a BeverageQuantity with a non existin beverage
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{not_available_id}/beverages
+      method: GET
+    response:
+      status_code: 404
+
+  #Get Price of Order
+  - name: verify that status code equals 200 when we get the price of the order and the correct price is returned
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{order_id}/price
+      method: GET
+    response:
+      status_code: 200
+      json:
+        price: !float "{order_price_beverage_1:f}"
+
+  #Update Beverage of wrong Order
+  - name: verify that status code equals 404 when we update a BeverageQuantity from a non existing order
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{not_available_id}/beverages
+      method: PUT
+      json:
+        quantity: !int "{order_beverage_quantity_2:d}"
+        beverage_id: "{beverage_id}"
+    response:
+      status_code: 404
+
+  #Update wrong Beverage of Order
+  - name: verify that status code equals 404 when we update a BeverageQuantity with a non existin beverage
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{order_id}/beverages
+      method: PUT
+      json:
+        quantity: !int "{order_beverage_quantity_2:d}"
+        beverage_id: "{not_available_id}"
+    response:
+      status_code: 404
+
+  #Update Beverage to too much quantity
+  - name: verify that status code equals 409 when we update a BeverageQuantity with too much quantity
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{order_id}/beverages
+      method: PUT
+      json:
+        quantity: !int "{invalid_order_beverage_quantity:d}"
+        beverage_id: "{beverage_id}"
+    response:
+      status_code: 409
+
+  #Update Beverage to zero
+  - name: verify that status code equals 422 when we update a BeverageQuantity with a non existin beverage
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{order_id}/beverages
+      method: PUT
+      json:
+        quantity: 0
+        beverage_id: "{beverage_id}"
+    response:
+      status_code: 422
+
+  #Update Beverage of Order
+  - name: verify that status code equals 202 when we update a BeverageQuantity
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{order_id}/beverages
+      method: PUT
+      json:
+        quantity: !int "{order_beverage_quantity_2:d}"
+        beverage_id: "{beverage_id}"
+    response:
+      status_code: 200
+
+  #Check correct Price
+  - name: verify that status code equals 200 when we get the price of the order and the correct price is returned
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{order_id}/price
+      method: GET
+    response:
+      status_code: 200
+      json:
+        price: !float "{order_price_beverage_2:f}"
+
+  #Delete Beverage from wrong Order
+  - name: verify that status code equals 404 when we try to delete from a non existing order
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{not_available_id}/beverages?beverage_id={beverage_id}
+      method: DELETE
+    response:
+      status_code: 404
+
+  #Delete wrong Beverage from Order
+  - name: verify that status code equals 404 when we try to a non existing beverage from an existing order
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{order_id}/beverages?beverage_id={not_available_id}
+      method: DELETE
+    response:
+      status_code: 404
+
+  #Delete Beverages from Order
+  - name: verify that status code equals 204 when delete the remaining beverages
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{order_id}/beverages?beverage_id={beverage_id}
+      method: DELETE
+    response:
+      status_code: 204
+
+  #Get Price of Order
+  - name: verify that status code equals 200 when we get the price of the order and the correct price is returned
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{order_id}/price
+      method: GET
+    response:
+      status_code: 200
+      json:
+        price: 0
+
+  #Get Price of not existing Order
+  - name: verify that status code equals 404 when we get the price of a not existing order
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{not_available_id}/price
+      method: GET
+    response:
+      status_code: 404
+
+
+#-----------------------Delete everything-------------------
+  #Delete Order
+  - type: ref
+    id: delete_order
+
+  #Delete beverage
+  - type: ref
+    id: delete_beverage
+
+  #Delete user
+  - type: ref
+    id: delete_user

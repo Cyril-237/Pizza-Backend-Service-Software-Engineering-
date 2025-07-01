@@ -1,0 +1,56 @@
+---
+
+name: Order stage
+
+description:
+  Reusable test stage for creating doughs
+
+variables:
+  address_street: "Schöfferstraße"
+  address_post_code: "64295"
+  address_house_number: 3
+  address_country: "Deutschland"
+  address_town: "Darmstadt"
+  address_first_name: "Rainer"
+  address_last_name: "Zufall"
+
+stages:
+  - id: create_order
+    name: create the test order
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order
+      method: POST
+      json:
+        user_id: "{user_id}"
+        address: &address
+          street: "{address_street:s}"
+          post_code: "{address_post_code:s}"
+          house_number: !int "{address_house_number:d}"
+          country: "{address_country:s}"
+          town: "{address_town:s}"
+          first_name: "{address_first_name:s}"
+          last_name: "{address_last_name:s}"
+    response:
+      status_code: 201
+      json:
+        order_datetime: !anything
+        id: !anything
+        user_id: !anything
+        address:
+          <<: *address
+          id: !anything
+        order_status: !anything
+      save:
+        json:
+          address_id: address.id
+          order_id: id
+          datetime: order_datetime
+          order_status: status
+
+  - id: delete_order
+    name: Delete order with id
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{order_id}
+      method: DELETE
+    response:
+      status_code: 204

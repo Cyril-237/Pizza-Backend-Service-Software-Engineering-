@@ -1,0 +1,151 @@
+---
+
+test_name: Make sure server implements crud functionality for beverage endpoint
+
+includes:
+  - !include common.yaml
+
+
+stages:
+
+  # Creating beverages ************************************************************
+
+  - name: Create - Verify that status code equals 201 when we create a new beverage and the beverage is returned
+    # max_retries and delay_after needs to be set in first stage of each stage to wait for uvicorn
+    max_retries: 20
+    delay_after: 2
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/beverages
+      json: &cola_beverage
+        name: "{beverage_name:s}"
+        price: !float "{beverage_price:f}"
+        description: "{beverage_description}"
+        stock: !int "{beverage_stock:d}"
+      method: POST
+    response:
+      status_code: 201
+      json:
+        <<: *cola_beverage
+        id: !anything
+      save:
+        json:
+          beverage_id: id
+
+  - name: Edge Create - Verify that we get a redirect to an already existing item, when we create a new beverage with a name that already exists
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/beverages
+      json:
+        name: "{beverage_name:s}"
+        price: 9.99
+        description: "My new beverage"
+        stock: 300
+      method: POST
+    response:
+      status_code: 303
+      headers:
+        location: "http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/beverages/{beverage_id}"
+
+  # Read beverages ************************************************************
+
+  - name: Read - Get beverage with id
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/beverages/{beverage_id}
+      method: GET
+    response:
+      status_code: 200
+      json: &cola_with_beverage
+        <<: *cola_beverage
+        id: "{beverage_id}"
+
+  - name: Edge Read - Check for status 404 if we try to get an beverage with a not existing id 00000000-0000-0000-0000-000000000000
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/beverages/00000000-0000-0000-0000-000000000000
+      method: GET
+    response:
+      status_code: 404
+
+  - name: Read - Get a list of beverages
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/beverages
+      method: GET
+    response:
+      strict: False
+      status_code: 200
+      json: !anylist
+        id: "{beverage_id}"
+        name: "{beverage_name:s}"
+        price: !float "{beverage_price:f}"
+        description: "{beverage_description}"
+
+  # Update beverages ************************************************************
+
+  - name: Update - Modify beverage
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/beverages/{beverage_id}
+      method: PUT
+      json:
+        <<: *cola_beverage
+        description: "My new description"
+    response:
+      status_code: 204
+
+  - name: Edge Update - Check that a new beverage is created when an existing beverage gets a new name and the name does not already exists
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/beverages/{beverage_id}
+      method: PUT
+      json:
+        <<: *cola_beverage
+        name: "Sprite"
+    response:
+      status_code: 201
+      json:
+        <<: *cola_beverage
+        id: !anything
+        name: "Sprite"
+      save:
+        json:
+          beverage_id2: id
+
+  - name: Edge Update - Check for status if we update beverage to an already existing name
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/beverages/{beverage_id}
+      method: PUT
+      json:
+        <<: *cola_beverage
+        name: "Sprite"
+    response:
+      status_code: 303
+      headers:
+        location: "http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/beverages/{beverage_id2}"
+
+  - name: Edge Update - Check for status 404 if we update with a non existing id
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/beverages/00000000-0000-0000-0000-000000000000
+      method: PUT
+      json:
+        <<: *cola_beverage
+    response:
+      status_code: 404
+
+# Check deleting beverages
+
+  - name: Delete - Delete beverage created first with id and check status
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/beverages/{beverage_id}
+      method: DELETE
+    response:
+      status_code: 204
+
+  - name: Delete - Delete beverage created second with id and check status
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/beverages/{beverage_id2}
+      method: DELETE
+    response:
+      status_code: 204
+
+  - name: Edge Delete - Check for status 404 if we delete a non-existing id
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/beverages/00000000-0000-0000-0000-000000000000
+      method: DELETE
+    response:
+      status_code: 404

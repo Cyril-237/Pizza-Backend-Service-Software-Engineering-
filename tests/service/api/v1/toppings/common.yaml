@@ -1,0 +1,10 @@
+---
+
+name: Common
+description: common test information
+
+variables:
+  topping_name: "Salami"
+  topping_price: 1.50
+  topping_description: "Italian quality"
+  topping_stock: 10

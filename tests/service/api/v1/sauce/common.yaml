@@ -1,0 +1,11 @@
+---
+
+name: Common
+description: common test information
+
+variables:
+  sauce_name: "Tomatooo"
+  sauce_price: 0.50
+  sauce_description: "Test Sauce"
+  sauce_stock: 10
+  sauce_type: "SPICY"

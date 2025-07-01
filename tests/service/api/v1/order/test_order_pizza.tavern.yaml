@@ -1,0 +1,151 @@
+---
+
+test_name: Make sure server implements crud functionality for order endpoint
+
+includes:
+  - !include common.yaml
+  - !include ../order/order_stage.yaml
+  - !include ../dough/dough_stage.yaml
+  - !include ../sauce/sauce_stage.yaml
+  - !include ../pizza_type/pizza_type_stage.yaml
+  - !include ../users/user_stage.yaml
+
+stages:
+  #Create User
+  - type: ref
+    id: create_user
+
+  #Create Order
+  - type: ref
+    id: create_order
+#--------------------Create everything needed for a Pizza-------------------------------
+  #Create Dough
+  - type: ref
+    id: create_dough
+
+  #Create Sauce
+  - type: ref
+    id: create_sauce
+
+  #Create pizza_type
+  - type: ref
+    id: create_pizza_type
+
+#---------------------Test Pizza Order Relation----------------------------
+  #Add Pizza to Order
+  - name: Add Pizza to Order and verify 200 status code
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{order_id}/pizzas
+      method: POST
+      json:
+        pizza_type_id: "{pizza_type_id}"
+    response:
+      status_code: 200
+      json:
+        id: !anything
+      save:
+        json:
+          pizza_id: id
+
+  #Add Pizza with wrong PizzaType to Order
+  - name: Add pizza with wrong pizza_type_id to existing order and verify 404 status code
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{order_id}/pizzas
+      method: POST
+      json:
+        pizza_type_id: "{not_available_id}"
+    response:
+      status_code: 404
+
+  #Add Pizza to wrong Order
+  - name: Add pizza with right pizza_type_id to non existing order and verify 404 status code
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{not_available_id}/pizzas
+      method: POST
+      json:
+        pizza_type_id: "{pizza_type_id}"
+    response:
+      status_code: 404
+
+  #Get Pizza from Order
+  - name: Get Pizzas from Order and verify it's the right one
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{order_id}/pizzas
+      method: GET
+    response:
+      status_code: 200
+      json:
+        - name: "{pizza_name:s}"
+          price: !float "{pizza_price:f}"
+          description: "{pizza_description}"
+          id: "{pizza_id}"
+
+  #Get Pizza from wrong Order
+  - name: Get Pizzas from wrong Order and verify status code 404
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{not_available_id}/pizzas
+      method: GET
+    response:
+      status_code: 404
+
+  #Get Price of Order
+  - name: Get Price of order
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{order_id}/price
+      method: GET
+    response:
+      status_code: 200
+      json:
+        price: !float "{order_price_pizza:f}"
+
+  #Delete Pizza from Order
+  - name: Delete Pizza from Order
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{order_id}/pizzas
+      method: DELETE
+      json:
+        id: "{pizza_id}"
+    response:
+      status_code: 200
+
+  #Delete wrong Pizza from Order
+  - name: Delete pizza with wrong id from existing order and verify 404 status code
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{order_id}/pizzas
+      method: DELETE
+      json:
+        id: "{not_available_id}"
+    response:
+      status_code: 404
+
+  #Delete Pizza from wrong Order
+  - name: Delete pizza with existing id from non existing order and verify 404 status code
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{not_available_id}/pizzas
+      method: DELETE
+      json:
+        id: "{pizza_id}"
+    response:
+      status_code: 404
+
+
+#---------------------Delete Everything-----------------------------------
+  #Delete Order
+  - type: ref
+    id: delete_order
+
+  #Delete pizza_type
+  - type: ref
+    id: delete_pizza_type
+
+  #Delete Dough
+  - type: ref
+    id: delete_dough
+
+  #Delete Sauce
+  - type: ref
+    id: delete_sauce
+
+  #Delete user
+  - type: ref
+    id: delete_user

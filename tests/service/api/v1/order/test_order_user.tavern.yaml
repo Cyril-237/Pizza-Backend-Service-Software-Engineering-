@@ -1,0 +1,49 @@
+---
+
+test_name: Make sure server implements crud functionality for beverage order relation
+
+includes:
+  - !include common.yaml
+  - !include ../order/order_stage.yaml
+  - !include ../users/user_stage.yaml
+
+stages:
+#-------------------------Create Order------------------------------
+  #Create User
+  - type: ref
+    id: create_user
+
+  #Create Order
+  - type: ref
+    id: create_order
+
+
+#---------------------Test User Order Relationship-----------------------
+  #Get User from Order
+  - name: Get user via order user_id
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{order_id}/user
+      method: GET
+    response:
+      status_code: 200
+      json:
+        username: "{username}"
+        id: "{user_id}"
+
+  #Get User from not existing Order
+  - name: Get user via order user_id
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{not_available_id}/user
+      method: GET
+    response:
+      status_code: 404
+
+
+#--------------------Delete everything--------------------------------
+  #Delete Order
+  - type: ref
+    id: delete_order
+
+  #Delete user
+  - type: ref
+    id: delete_user

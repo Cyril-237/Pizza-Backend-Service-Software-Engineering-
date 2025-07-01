@@ -1,0 +1,37 @@
+---
+
+name: Common
+description: common test information
+
+variables:
+
+  quantity: 8
+  not_available_id: "00000000-0000-0000-0000-000000000000"
+
+  order_price_pizza: 5
+
+  order_price_beverage: 5.98
+
+  username: "stkekrie"
+
+  dough_name: "Whole Grain"
+  dough_price: 1.50
+  dough_description: "Test Dough"
+  dough_stock: 2
+
+  sauce_name: "garlic"
+  sauce_price: 0.50
+  sauce_description: "Test Sauce"
+  sauce_stock: 10
+  sauce_type: "SPICY"
+
+  topping_name: "Salami"
+  topping_price: 1.50
+  topping_description: "Italian quality"
+
+  stock_base: 10
+  quantity_less_than_stock: 7
+  stock_left: 3
+  stock_more_than_quantity: 11
+  quantity_equal_to_stock: 10
+  quantity_more_than_stock: 11

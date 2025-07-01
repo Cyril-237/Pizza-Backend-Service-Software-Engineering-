@@ -1,0 +1,45 @@
+---
+
+name: Beverage stage
+
+description:
+  Reusable test stage for creating beverages
+
+variables:
+
+  beverage_name: "Fanta"
+  beverage_price: 2.99
+  beverage_description: "Coca Cola Company"
+  beverage_stock: 10
+
+stages:
+
+  - id: create_beverage
+    name: create the test beverage
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/beverages
+      json:
+        name: "{beverage_name:s}"
+        price: !float "{beverage_price:f}"
+        description: "{beverage_description}"
+        stock: !int "{beverage_stock:d}"
+      method: POST
+    response:
+        status_code: 201
+        json:
+          name: "{beverage_name:s}"
+          price: !float "{beverage_price:f}"
+          description: "{beverage_description}"
+          stock: !int "{beverage_stock:d}"
+          id: !anything
+        save:
+          json:
+            beverage_id: id
+
+  - id: delete_beverage
+    name: Delete beverage with id
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/beverages/{beverage_id}
+      method: DELETE
+    response:
+      status_code: 204

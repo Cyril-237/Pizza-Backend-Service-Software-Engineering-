@@ -1,0 +1,73 @@
+---
+
+name: Topping stage
+
+description:
+  Reusable test stage for creating doughs
+
+variables:
+  topping_name: "Mozzarella"
+  topping_price: 0.50
+  topping_description: "Italian quality"
+  topping_stock: 10
+
+  topping2_name: "Mais"
+  topping2_price: 1.0
+  topping2_description: "corny"
+  topping2_stock: 10
+
+stages:
+
+  - id: create_topping
+    name: create the test topping
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/toppings
+      json: &cheese_topping
+        name: "{topping_name:s}"
+        price: !float "{topping_price:f}"
+        description: "{topping_description}"
+        stock: !int "{topping_stock:d}"
+      method: POST
+    response:
+      status_code: 201
+      json:
+        <<: *cheese_topping
+        id: !anything
+      save:
+        json:
+          topping_id: id
+
+  - id: create_topping_2
+    name: Verify that status code equals 201 when we create a new topping and the topping is returned
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/toppings
+      json: &corn_topping
+        name: "{topping2_name:s}"
+        price: !float "{topping2_price:f}"
+        description: "{topping2_description}"
+        stock: !int "{topping2_stock:d}"
+      method: POST
+    response:
+      status_code: 201
+      json:
+        <<: *corn_topping
+        id: !anything
+      save:
+        json:
+          topping2_id: id
+
+  - id: delete_topping
+    name: Delete topping with id
+    request:
+        url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/toppings/{topping_id}
+        method: DELETE
+    response:
+        status_code: 204
+
+  - id: delete_topping_2
+    name: Delete topping with id
+    request:
+        url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/toppings/{topping2_id}
+        method: DELETE
+    response:
+        status_code: 204

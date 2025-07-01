@@ -1,0 +1,30 @@
+{
+  "name": "pizza-order-app",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "test": "vitest",
+    "coverage": "vitest run --coverage",
+    "serve": "vite preview"
+  },
+  "dependencies": {
+    "@preact/signals": "^2.0.1",
+    "mutative": "^1.1.0",
+    "preact": "^10.25.4"
+  },
+  "devDependencies": {
+    "@preact/preset-vite": "^2.x",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/preact": "^3.x",
+    "@vitest/coverage-v8": "^3.0.4",
+    "happy-dom": "^16.8.1",
+    "typescript": "^5.x",
+    "vite": "^4.x",
+    "vitest": "^3.0.4",
+    "istanbul": "^0.4.5"
+  }
+}

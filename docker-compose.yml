@@ -1,0 +1,38 @@
+x-common-variables: &DB_VARIABLES
+  DATABASE_HOST: db-dev
+  DATABASE_PORT: 5432
+  DATABASE_USERNAME: postgres
+  DATABASE_PASSWORD: mysecretpassword
+  DATABASE_NAME: postgres
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: mysecretpassword
+  POSTGRES_DB: postgres
+
+services:
+  web:
+    container_name: Girschick-Mo2-Green_1337_pizza_web_dev
+    build:
+      context: ./
+      dockerfile: ./infra/build_artifacts/development.dockerfile
+    ports:
+      - 8000:8000
+    volumes:
+      - ./app:/web/app
+      - ./tests:/web/tests
+    environment: *DB_VARIABLES
+    depends_on:
+      db-dev:
+        condition: service_healthy
+    entrypoint: [ ]
+
+  db-dev:
+    container_name: Girschick-Mo2-Green_1337_pizza_db_dev
+    image: postgres:15-alpine
+    ports:
+      - '5432:5432'
+    environment: *DB_VARIABLES
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5

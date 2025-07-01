@@ -1,0 +1,186 @@
+---
+
+test_name: Make sure server implements stock logic for topping
+
+includes:
+  - !include common.yaml
+  - !include ../../order/order_stage.yaml
+  - !include ../../pizza_type/pizza_type_stage.yaml
+  - !include ../../dough/dough_stage.yaml
+  - !include ../../sauce/sauce_stage.yaml
+  - !include ../../users/user_stage.yaml
+
+stages:
+#-------------------Create Order------------------------
+  #Create User
+  - type: ref
+    id: create_user
+
+  #Create Order
+  - type: ref
+    id: create_order
+
+
+#--------------------Create everything needed for a Pizza-------------------------------
+  #Create Dough with 0 stock
+  - type: ref
+    id: create_dough
+
+  #Create Sauce with 0 stock
+  - type: ref
+    id: create_sauce
+
+  #Create pizza_type
+  - type: ref
+    id: create_pizza_type
+
+  #create topping with insufficient stock amount for a pizza_type
+  - name: Verify that status code equals 201 when we create a new topping and the topping is returned
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/toppings
+      json: &topping
+        name: "{topping_name:s}"
+        price: !float "{topping_price:f}"
+        description: "{topping_description}"
+        stock: !int "{quantity_less_than_stock:d}"
+      method: POST
+    response:
+      status_code: 201
+      json:
+        <<: *topping
+        id: !anything
+      save:
+        json:
+          topping_id: id
+
+  #Create relation between pizza and topping with topping quantity bigger topping stock
+  - name: verify that status code equals 201 and the quantity and topping_id is returned when we create a topping pizza_type relation (put a topping on a pizza)
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/pizza-types/{pizza_type_id}/toppings
+      json: &salami_pizza_salami_topping_quantity
+        quantity: !int "{quantity:d}"
+        topping_id: "{topping_id}"
+      method: POST
+    response:
+      status_code: 201
+      json:
+        <<: *salami_pizza_salami_topping_quantity
+
+#---------------------Test Insufficient Stock----------------------------
+  - name: Add Pizza with insufficient topping stock to Order and verify 409 status code
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{order_id}/pizzas
+      method: POST
+      json:
+        pizza_type_id: "{pizza_type_id}"
+    response:
+      status_code: 409
+
+#-----------------------Increase Topping Stock
+  - name: Update topping stock to sufficient amount
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/toppings/{topping_id}
+      method: PUT
+      json:
+          <<: *topping
+          stock: !int "{stock_more_than_quantity}"
+
+#---------------------Test Sufficient Stock----------------------------
+  #Add Pizza to Order
+  - name: Add Pizza with sufficient stock to Order and verify 200 status code
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{order_id}/pizzas
+      method: POST
+      json:
+        pizza_type_id: "{pizza_type_id}"
+    response:
+      status_code: 200
+      json:
+          id: !anything
+      save:
+        json:
+          pizza_id: id
+
+  - name: Verify if topping stock was reduced by quantity
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/toppings/{topping_id}
+      method: GET
+    response:
+      json:
+        <<: *topping
+        stock: !int "{stock_left}"
+        id: "{topping_id}"
+
+  #Delete Pizza from Order
+  - name: Delete Pizza from Order
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{order_id}/pizzas
+      method: DELETE
+      json:
+          id: "{pizza_id}"
+    response:
+      status_code: 200
+
+  - name: Verify if topping stock was increased to the original stock
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/toppings/{topping_id}
+      method: GET
+    response:
+      json:
+          <<: *topping
+          stock: !int "{stock_more_than_quantity}"
+          id: "{topping_id}"
+
+  #Add pizza again to check for stock increase when deleting an order
+  - name: Add Pizza again with sufficient stock to Order and verify 200 status code
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{order_id}/pizzas
+      method: POST
+      json:
+        pizza_type_id: "{pizza_type_id}"
+    response:
+      status_code: 200
+      json:
+          id: !anything
+      save:
+        json:
+          pizza_id: id
+
+  #Delete Order
+  - type: ref
+    id: delete_order
+
+  #Delete user
+  - type: ref
+    id: delete_user
+
+  - name: Verify if topping stock was increased to the original stock
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/toppings/{topping_id}
+      method: GET
+    response:
+      json:
+          <<: *topping
+          stock: !int "{stock_more_than_quantity}"
+          id: "{topping_id}"
+
+#---------------------Delete Everything else-----------------------------------
+  #Delete Pizza_type
+  - type: ref
+    id: delete_pizza_type
+
+  #Delete dough
+  - type: ref
+    id: delete_dough
+
+  #Delete sauce
+  - type: ref
+    id: delete_sauce
+
+  #Delete Topping
+  - name: Delete topping
+    request:
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/toppings/{topping_id}
+      method: DELETE
+    response:
+      status_code: 204

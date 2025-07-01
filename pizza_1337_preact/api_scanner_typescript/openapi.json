@@ -1,0 +1,2523 @@
+{
+    "openapi": "3.0.2",
+    "info": {
+        "title": "FastAPI",
+        "version": "0.1.0"
+    },
+    "paths": {
+        "/v1/pizza-types": {
+            "get": {
+                "tags": [
+                    "pizza_type"
+                ],
+                "summary": "Get All Pizza Types",
+                "operationId": "get_all_pizza_types_v1_pizza_types_get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "title": "Response Get All Pizza Types V1 Pizza Types Get",
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/PizzaTypeSchema"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "pizza_type"
+                ],
+                "summary": "Create Pizza Type",
+                "operationId": "create_pizza_type_v1_pizza_types_post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PizzaTypeCreateSchema"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PizzaTypeSchema"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/pizza-types/{pizza_type_id}": {
+            "get": {
+                "tags": [
+                    "pizza_type"
+                ],
+                "summary": "Get Pizza Type",
+                "operationId": "get_pizza_type_v1_pizza_types__pizza_type_id__get",
+                "parameters": [
+                    {
+                        "required": true,
+                        "schema": {
+                            "title": "Pizza Type Id",
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "name": "pizza_type_id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PizzaTypeSchema"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "pizza_type"
+                ],
+                "summary": "Update Pizza Type",
+                "operationId": "update_pizza_type_v1_pizza_types__pizza_type_id__put",
+                "parameters": [
+                    {
+                        "required": true,
+                        "schema": {
+                            "title": "Pizza Type Id",
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "name": "pizza_type_id",
+                        "in": "path"
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PizzaTypeCreateSchema"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PizzaTypeSchema"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "pizza_type"
+                ],
+                "summary": "Delete Pizza Type",
+                "operationId": "delete_pizza_type_v1_pizza_types__pizza_type_id__delete",
+                "parameters": [
+                    {
+                        "required": true,
+                        "schema": {
+                            "title": "Pizza Type Id",
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "name": "pizza_type_id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/pizza-types/{pizza_type_id}/toppings": {
+            "get": {
+                "tags": [
+                    "pizza_type"
+                ],
+                "summary": "Get Pizza Type Toppings",
+                "operationId": "get_pizza_type_toppings_v1_pizza_types__pizza_type_id__toppings_get",
+                "parameters": [
+                    {
+                        "required": true,
+                        "schema": {
+                            "title": "Pizza Type Id",
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "name": "pizza_type_id",
+                        "in": "path"
+                    },
+                    {
+                        "required": false,
+                        "schema": {
+                            "title": "Join",
+                            "type": "boolean",
+                            "default": false
+                        },
+                        "name": "join",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "title": "Response Get Pizza Type Toppings V1 Pizza Types  Pizza Type Id  Toppings Get",
+                                    "anyOf": [
+                                        {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/PizzaTypeToppingQuantityCreateSchema"
+                                            }
+                                        },
+                                        {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/JoinedPizzaTypeQuantitySchema"
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "pizza_type"
+                ],
+                "summary": "Create Pizza Type Topping",
+                "operationId": "create_pizza_type_topping_v1_pizza_types__pizza_type_id__toppings_post",
+                "parameters": [
+                    {
+                        "required": true,
+                        "schema": {
+                            "title": "Pizza Type Id",
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "name": "pizza_type_id",
+                        "in": "path"
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PizzaTypeToppingQuantityCreateSchema"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PizzaTypeToppingQuantityCreateSchema"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/pizza-types/{pizza_type_id}/dough": {
+            "get": {
+                "tags": [
+                    "pizza_type"
+                ],
+                "summary": "Get Pizza Type Dough",
+                "operationId": "get_pizza_type_dough_v1_pizza_types__pizza_type_id__dough_get",
+                "parameters": [
+                    {
+                        "required": true,
+                        "schema": {
+                            "title": "Pizza Type Id",
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "name": "pizza_type_id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DoughSchema"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/toppings": {
+            "get": {
+                "tags": [
+                    "topping"
+                ],
+                "summary": "Get All Toppings",
+                "operationId": "get_all_toppings_v1_toppings_get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "title": "Response Get All Toppings V1 Toppings Get",
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/ToppingListItemSchema"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "topping"
+                ],
+                "summary": "Create Topping",
+                "operationId": "create_topping_v1_toppings_post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ToppingCreateSchema"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ToppingSchema"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/toppings/{topping_id}": {
+            "get": {
+                "tags": [
+                    "topping"
+                ],
+                "summary": "Get Topping",
+                "operationId": "get_topping_v1_toppings__topping_id__get",
+                "parameters": [
+                    {
+                        "required": true,
+                        "schema": {
+                            "title": "Topping Id",
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "name": "topping_id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ToppingSchema"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "topping"
+                ],
+                "summary": "Update Topping",
+                "operationId": "update_topping_v1_toppings__topping_id__put",
+                "parameters": [
+                    {
+                        "required": true,
+                        "schema": {
+                            "title": "Topping Id",
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "name": "topping_id",
+                        "in": "path"
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ToppingCreateSchema"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ToppingSchema"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "topping"
+                ],
+                "summary": "Delete Topping",
+                "operationId": "delete_topping_v1_toppings__topping_id__delete",
+                "parameters": [
+                    {
+                        "required": true,
+                        "schema": {
+                            "title": "Topping Id",
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "name": "topping_id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/doughs": {
+            "get": {
+                "tags": [
+                    "dough"
+                ],
+                "summary": "Get All Doughs",
+                "operationId": "get_all_doughs_v1_doughs_get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "title": "Response Get All Doughs V1 Doughs Get",
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/DoughListItemSchema"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "dough"
+                ],
+                "summary": "Create Dough",
+                "operationId": "create_dough_v1_doughs_post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/DoughCreateSchema"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DoughSchema"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/doughs/{dough_id}": {
+            "get": {
+                "tags": [
+                    "dough"
+                ],
+                "summary": "Get Dough",
+                "operationId": "get_dough_v1_doughs__dough_id__get",
+                "parameters": [
+                    {
+                        "required": true,
+                        "schema": {
+                            "title": "Dough Id",
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "name": "dough_id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DoughSchema"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "dough"
+                ],
+                "summary": "Update Dough",
+                "operationId": "update_dough_v1_doughs__dough_id__put",
+                "parameters": [
+                    {
+                        "required": true,
+                        "schema": {
+                            "title": "Dough Id",
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "name": "dough_id",
+                        "in": "path"
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/DoughCreateSchema"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DoughSchema"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "dough"
+                ],
+                "summary": "Delete Dough",
+                "operationId": "delete_dough_v1_doughs__dough_id__delete",
+                "parameters": [
+                    {
+                        "required": true,
+                        "schema": {
+                            "title": "Dough Id",
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "name": "dough_id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/order": {
+            "get": {
+                "tags": [
+                    "order"
+                ],
+                "summary": "Get All Orders",
+                "operationId": "get_all_orders_v1_order_get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "title": "Response Get All Orders V1 Order Get",
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/OrderSchema"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "order"
+                ],
+                "summary": "Create Order",
+                "operationId": "create_order_v1_order_post",
+                "parameters": [
+                    {
+                        "required": false,
+                        "schema": {
+                            "title": "Copy Order Id",
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "name": "copy_order_id",
+                        "in": "query"
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OrderCreateSchema"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OrderSchema"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/order/{order_id}": {
+            "get": {
+                "tags": [
+                    "order"
+                ],
+                "summary": "Get Order",
+                "operationId": "get_order_v1_order__order_id__get",
+                "parameters": [
+                    {
+                        "required": true,
+                        "schema": {
+                            "title": "Order Id",
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "name": "order_id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OrderSchema"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "order"
+                ],
+                "summary": "Delete Order",
+                "operationId": "delete_order_v1_order__order_id__delete",
+                "parameters": [
+                    {
+                        "required": true,
+                        "schema": {
+                            "title": "Order Id",
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "name": "order_id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/order/{order_id}/pizzas": {
+            "get": {
+                "tags": [
+                    "order"
+                ],
+                "summary": "Get Pizzas From Order",
+                "operationId": "get_pizzas_from_order_v1_order__order_id__pizzas_get",
+                "parameters": [
+                    {
+                        "required": true,
+                        "schema": {
+                            "title": "Order Id",
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "name": "order_id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "title": "Response Get Pizzas From Order V1 Order  Order Id  Pizzas Get",
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/JoinedPizzaPizzaTypeSchema"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "order"
+                ],
+                "summary": "Add Pizza To Order",
+                "operationId": "add_pizza_to_order_v1_order__order_id__pizzas_post",
+                "parameters": [
+                    {
+                        "required": true,
+                        "schema": {
+                            "title": "Order Id",
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "name": "order_id",
+                        "in": "path"
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PizzaCreateSchema"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PizzaWithoutPizzaTypeSchema"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "order"
+                ],
+                "summary": "Delete Pizza From Order",
+                "operationId": "delete_pizza_from_order_v1_order__order_id__pizzas_delete",
+                "parameters": [
+                    {
+                        "required": true,
+                        "schema": {
+                            "title": "Order Id",
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "name": "order_id",
+                        "in": "path"
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PizzaWithoutPizzaTypeSchema"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/order/{order_id}/beverages": {
+            "get": {
+                "tags": [
+                    "order"
+                ],
+                "summary": "Get Order Beverages",
+                "operationId": "get_order_beverages_v1_order__order_id__beverages_get",
+                "parameters": [
+                    {
+                        "required": true,
+                        "schema": {
+                            "title": "Order Id",
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "name": "order_id",
+                        "in": "path"
+                    },
+                    {
+                        "required": false,
+                        "schema": {
+                            "title": "Join",
+                            "type": "boolean",
+                            "default": false
+                        },
+                        "name": "join",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "title": "Response Get Order Beverages V1 Order  Order Id  Beverages Get",
+                                    "anyOf": [
+                                        {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/OrderBeverageQuantityCreateSchema"
+                                            }
+                                        },
+                                        {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/JoinedOrderBeverageQuantitySchema"
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "order"
+                ],
+                "summary": "Update Beverage Of Order",
+                "operationId": "update_beverage_of_order_v1_order__order_id__beverages_put",
+                "parameters": [
+                    {
+                        "required": true,
+                        "schema": {
+                            "title": "Order Id",
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "name": "order_id",
+                        "in": "path"
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OrderBeverageQuantityCreateSchema"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OrderBeverageQuantityBaseSchema"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "order"
+                ],
+                "summary": "Create Order Beverage",
+                "operationId": "create_order_beverage_v1_order__order_id__beverages_post",
+                "parameters": [
+                    {
+                        "required": true,
+                        "schema": {
+                            "title": "Order Id",
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "name": "order_id",
+                        "in": "path"
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OrderBeverageQuantityCreateSchema"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OrderBeverageQuantityCreateSchema"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "order"
+                ],
+                "summary": "Delete Beverage From Order",
+                "operationId": "delete_beverage_from_order_v1_order__order_id__beverages_delete",
+                "parameters": [
+                    {
+                        "required": true,
+                        "schema": {
+                            "title": "Order Id",
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "name": "order_id",
+                        "in": "path"
+                    },
+                    {
+                        "required": true,
+                        "schema": {
+                            "title": "Beverage Id",
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "name": "beverage_id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/order/{order_id}/price": {
+            "get": {
+                "tags": [
+                    "order"
+                ],
+                "summary": "Get Price Of Order",
+                "operationId": "get_price_of_order_v1_order__order_id__price_get",
+                "parameters": [
+                    {
+                        "required": true,
+                        "schema": {
+                            "title": "Order Id",
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "name": "order_id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OrderPriceSchema"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/order/{order_id}/user": {
+            "get": {
+                "tags": [
+                    "order"
+                ],
+                "summary": "Get User Of Order",
+                "operationId": "get_user_of_order_v1_order__order_id__user_get",
+                "parameters": [
+                    {
+                        "required": true,
+                        "schema": {
+                            "title": "Order Id",
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "name": "order_id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserSchema"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/users": {
+            "get": {
+                "tags": [
+                    "user"
+                ],
+                "summary": "Get All Users",
+                "operationId": "get_all_users_v1_users_get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "title": "Response Get All Users V1 Users Get",
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/UserSchema"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "user"
+                ],
+                "summary": "Create User",
+                "operationId": "create_user_v1_users_post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UserCreateSchema"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserSchema"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/users/{user_id}": {
+            "get": {
+                "tags": [
+                    "user"
+                ],
+                "summary": "Get User",
+                "operationId": "get_user_v1_users__user_id__get",
+                "parameters": [
+                    {
+                        "required": true,
+                        "schema": {
+                            "title": "User Id",
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "name": "user_id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserSchema"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "user"
+                ],
+                "summary": "Update User",
+                "operationId": "update_user_v1_users__user_id__put",
+                "parameters": [
+                    {
+                        "required": true,
+                        "schema": {
+                            "title": "User Id",
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "name": "user_id",
+                        "in": "path"
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UserCreateSchema"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "user"
+                ],
+                "summary": "Delete User",
+                "operationId": "delete_user_v1_users__user_id__delete",
+                "parameters": [
+                    {
+                        "required": true,
+                        "schema": {
+                            "title": "User Id",
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "name": "user_id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/beverages": {
+            "get": {
+                "tags": [
+                    "beverage"
+                ],
+                "summary": "Get All Beverages",
+                "operationId": "get_all_beverages_v1_beverages_get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "title": "Response Get All Beverages V1 Beverages Get",
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/BeverageListItemSchema"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "beverage"
+                ],
+                "summary": "Create Beverage",
+                "operationId": "create_beverage_v1_beverages_post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/BeverageCreateSchema"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BeverageSchema"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/beverages/{beverage_id}": {
+            "get": {
+                "tags": [
+                    "beverage"
+                ],
+                "summary": "Get Beverage",
+                "operationId": "get_beverage_v1_beverages__beverage_id__get",
+                "parameters": [
+                    {
+                        "required": true,
+                        "schema": {
+                            "title": "Beverage Id",
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "name": "beverage_id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BeverageSchema"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "beverage"
+                ],
+                "summary": "Update Beverage",
+                "operationId": "update_beverage_v1_beverages__beverage_id__put",
+                "parameters": [
+                    {
+                        "required": true,
+                        "schema": {
+                            "title": "Beverage Id",
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "name": "beverage_id",
+                        "in": "path"
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/BeverageCreateSchema"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BeverageSchema"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "beverage"
+                ],
+                "summary": "Delete Beverage",
+                "operationId": "delete_beverage_v1_beverages__beverage_id__delete",
+                "parameters": [
+                    {
+                        "required": true,
+                        "schema": {
+                            "title": "Beverage Id",
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "name": "beverage_id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "AddressCreateSchema": {
+                "title": "AddressCreateSchema",
+                "required": [
+                    "street",
+                    "post_code",
+                    "house_number",
+                    "country",
+                    "town",
+                    "first_name",
+                    "last_name"
+                ],
+                "type": "object",
+                "properties": {
+                    "street": {
+                        "title": "Street",
+                        "type": "string"
+                    },
+                    "post_code": {
+                        "title": "Post Code",
+                        "type": "string"
+                    },
+                    "house_number": {
+                        "title": "House Number",
+                        "type": "integer"
+                    },
+                    "country": {
+                        "title": "Country",
+                        "type": "string"
+                    },
+                    "town": {
+                        "title": "Town",
+                        "type": "string"
+                    },
+                    "first_name": {
+                        "title": "First Name",
+                        "type": "string"
+                    },
+                    "last_name": {
+                        "title": "Last Name",
+                        "type": "string"
+                    }
+                }
+            },
+            "AddressSchema": {
+                "title": "AddressSchema",
+                "required": [
+                    "street",
+                    "post_code",
+                    "house_number",
+                    "country",
+                    "town",
+                    "first_name",
+                    "last_name",
+                    "id"
+                ],
+                "type": "object",
+                "properties": {
+                    "street": {
+                        "title": "Street",
+                        "type": "string"
+                    },
+                    "post_code": {
+                        "title": "Post Code",
+                        "type": "string"
+                    },
+                    "house_number": {
+                        "title": "House Number",
+                        "type": "integer"
+                    },
+                    "country": {
+                        "title": "Country",
+                        "type": "string"
+                    },
+                    "town": {
+                        "title": "Town",
+                        "type": "string"
+                    },
+                    "first_name": {
+                        "title": "First Name",
+                        "type": "string"
+                    },
+                    "last_name": {
+                        "title": "Last Name",
+                        "type": "string"
+                    },
+                    "id": {
+                        "title": "Id",
+                        "type": "string",
+                        "format": "uuid"
+                    }
+                }
+            },
+            "BeverageCreateSchema": {
+                "title": "BeverageCreateSchema",
+                "required": [
+                    "name",
+                    "price",
+                    "description",
+                    "stock"
+                ],
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "title": "Name",
+                        "type": "string"
+                    },
+                    "price": {
+                        "title": "Price",
+                        "type": "number"
+                    },
+                    "description": {
+                        "title": "Description",
+                        "type": "string"
+                    },
+                    "stock": {
+                        "title": "Stock",
+                        "type": "integer"
+                    }
+                }
+            },
+            "BeverageListItemSchema": {
+                "title": "BeverageListItemSchema",
+                "required": [
+                    "id",
+                    "name",
+                    "price",
+                    "description"
+                ],
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "title": "Id",
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "title": "Name",
+                        "type": "string"
+                    },
+                    "price": {
+                        "title": "Price",
+                        "type": "number"
+                    },
+                    "description": {
+                        "title": "Description",
+                        "type": "string"
+                    }
+                }
+            },
+            "BeverageSchema": {
+                "title": "BeverageSchema",
+                "required": [
+                    "name",
+                    "price",
+                    "description",
+                    "stock",
+                    "id"
+                ],
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "title": "Name",
+                        "type": "string"
+                    },
+                    "price": {
+                        "title": "Price",
+                        "type": "number"
+                    },
+                    "description": {
+                        "title": "Description",
+                        "type": "string"
+                    },
+                    "stock": {
+                        "title": "Stock",
+                        "type": "integer"
+                    },
+                    "id": {
+                        "title": "Id",
+                        "type": "string",
+                        "format": "uuid"
+                    }
+                }
+            },
+            "DoughCreateSchema": {
+                "title": "DoughCreateSchema",
+                "required": [
+                    "name",
+                    "price",
+                    "description",
+                    "stock"
+                ],
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "title": "Name",
+                        "type": "string"
+                    },
+                    "price": {
+                        "title": "Price",
+                        "type": "number"
+                    },
+                    "description": {
+                        "title": "Description",
+                        "type": "string"
+                    },
+                    "stock": {
+                        "title": "Stock",
+                        "type": "integer"
+                    }
+                }
+            },
+            "DoughListItemSchema": {
+                "title": "DoughListItemSchema",
+                "required": [
+                    "id",
+                    "name",
+                    "price",
+                    "description"
+                ],
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "title": "Id",
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "title": "Name",
+                        "type": "string"
+                    },
+                    "price": {
+                        "title": "Price",
+                        "type": "number"
+                    },
+                    "description": {
+                        "title": "Description",
+                        "type": "string"
+                    }
+                }
+            },
+            "DoughSchema": {
+                "title": "DoughSchema",
+                "required": [
+                    "name",
+                    "price",
+                    "description",
+                    "stock",
+                    "id"
+                ],
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "title": "Name",
+                        "type": "string"
+                    },
+                    "price": {
+                        "title": "Price",
+                        "type": "number"
+                    },
+                    "description": {
+                        "title": "Description",
+                        "type": "string"
+                    },
+                    "stock": {
+                        "title": "Stock",
+                        "type": "integer"
+                    },
+                    "id": {
+                        "title": "Id",
+                        "type": "string",
+                        "format": "uuid"
+                    }
+                }
+            },
+            "HTTPValidationError": {
+                "title": "HTTPValidationError",
+                "type": "object",
+                "properties": {
+                    "detail": {
+                        "title": "Detail",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ValidationError"
+                        }
+                    }
+                }
+            },
+            "JoinedOrderBeverageQuantitySchema": {
+                "title": "JoinedOrderBeverageQuantitySchema",
+                "required": [
+                    "name",
+                    "price",
+                    "description"
+                ],
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "title": "Name",
+                        "type": "string"
+                    },
+                    "price": {
+                        "title": "Price",
+                        "type": "number"
+                    },
+                    "description": {
+                        "title": "Description",
+                        "type": "string"
+                    }
+                }
+            },
+            "JoinedPizzaPizzaTypeSchema": {
+                "title": "JoinedPizzaPizzaTypeSchema",
+                "required": [
+                    "name",
+                    "price",
+                    "description",
+                    "id"
+                ],
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "title": "Name",
+                        "type": "string"
+                    },
+                    "price": {
+                        "title": "Price",
+                        "type": "number"
+                    },
+                    "description": {
+                        "title": "Description",
+                        "type": "string"
+                    },
+                    "id": {
+                        "title": "Id",
+                        "type": "string",
+                        "format": "uuid"
+                    }
+                }
+            },
+            "JoinedPizzaTypeQuantitySchema": {
+                "title": "JoinedPizzaTypeQuantitySchema",
+                "required": [
+                    "name",
+                    "price",
+                    "description"
+                ],
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "title": "Name",
+                        "type": "string"
+                    },
+                    "price": {
+                        "title": "Price",
+                        "type": "number"
+                    },
+                    "description": {
+                        "title": "Description",
+                        "type": "string"
+                    }
+                }
+            },
+            "OrderBeverageQuantityBaseSchema": {
+                "title": "OrderBeverageQuantityBaseSchema",
+                "required": [
+                    "quantity"
+                ],
+                "type": "object",
+                "properties": {
+                    "quantity": {
+                        "title": "Quantity",
+                        "type": "integer"
+                    }
+                }
+            },
+            "OrderBeverageQuantityCreateSchema": {
+                "title": "OrderBeverageQuantityCreateSchema",
+                "required": [
+                    "quantity",
+                    "beverage_id"
+                ],
+                "type": "object",
+                "properties": {
+                    "quantity": {
+                        "title": "Quantity",
+                        "type": "integer"
+                    },
+                    "beverage_id": {
+                        "title": "Beverage Id",
+                        "type": "string",
+                        "format": "uuid"
+                    }
+                }
+            },
+            "OrderCreateSchema": {
+                "title": "OrderCreateSchema",
+                "required": [
+                    "address",
+                    "user_id"
+                ],
+                "type": "object",
+                "properties": {
+                    "address": {
+                        "$ref": "#/components/schemas/AddressCreateSchema"
+                    },
+                    "user_id": {
+                        "title": "User Id",
+                        "type": "string",
+                        "format": "uuid"
+                    }
+                }
+            },
+            "OrderPriceSchema": {
+                "title": "OrderPriceSchema",
+                "required": [
+                    "price"
+                ],
+                "type": "object",
+                "properties": {
+                    "price": {
+                        "title": "Price",
+                        "type": "number"
+                    }
+                }
+            },
+            "OrderSchema": {
+                "title": "OrderSchema",
+                "required": [
+                    "address",
+                    "user_id",
+                    "order_status",
+                    "id",
+                    "order_datetime"
+                ],
+                "type": "object",
+                "properties": {
+                    "address": {
+                        "$ref": "#/components/schemas/AddressSchema"
+                    },
+                    "user_id": {
+                        "title": "User Id",
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "order_status": {
+                        "$ref": "#/components/schemas/OrderStatus"
+                    },
+                    "id": {
+                        "title": "Id",
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "order_datetime": {
+                        "title": "Order Datetime",
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                }
+            },
+            "OrderStatus": {
+                "title": "OrderStatus",
+                "enum": [
+                    "TRANSMITTED",
+                    "PREPARING",
+                    "IN_DELIVERY",
+                    "COMPLETED"
+                ],
+                "type": "string",
+                "description": "An enumeration."
+            },
+            "PizzaCreateSchema": {
+                "title": "PizzaCreateSchema",
+                "required": [
+                    "pizza_type_id"
+                ],
+                "type": "object",
+                "properties": {
+                    "pizza_type_id": {
+                        "title": "Pizza Type Id",
+                        "type": "string",
+                        "format": "uuid"
+                    }
+                }
+            },
+            "PizzaTypeCreateSchema": {
+                "title": "PizzaTypeCreateSchema",
+                "required": [
+                    "name",
+                    "price",
+                    "description",
+                    "dough_id"
+                ],
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "title": "Name",
+                        "type": "string"
+                    },
+                    "price": {
+                        "title": "Price",
+                        "type": "number"
+                    },
+                    "description": {
+                        "title": "Description",
+                        "type": "string"
+                    },
+                    "dough_id": {
+                        "title": "Dough Id",
+                        "type": "string",
+                        "format": "uuid"
+                    }
+                }
+            },
+            "PizzaTypeSchema": {
+                "title": "PizzaTypeSchema",
+                "required": [
+                    "name",
+                    "price",
+                    "description",
+                    "id"
+                ],
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "title": "Name",
+                        "type": "string"
+                    },
+                    "price": {
+                        "title": "Price",
+                        "type": "number"
+                    },
+                    "description": {
+                        "title": "Description",
+                        "type": "string"
+                    },
+                    "id": {
+                        "title": "Id",
+                        "type": "string",
+                        "format": "uuid"
+                    }
+                }
+            },
+            "PizzaTypeToppingQuantityCreateSchema": {
+                "title": "PizzaTypeToppingQuantityCreateSchema",
+                "required": [
+                    "quantity",
+                    "topping_id"
+                ],
+                "type": "object",
+                "properties": {
+                    "quantity": {
+                        "title": "Quantity",
+                        "type": "integer"
+                    },
+                    "topping_id": {
+                        "title": "Topping Id",
+                        "type": "string",
+                        "format": "uuid"
+                    }
+                }
+            },
+            "PizzaWithoutPizzaTypeSchema": {
+                "title": "PizzaWithoutPizzaTypeSchema",
+                "required": [
+                    "id"
+                ],
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "title": "Id",
+                        "type": "string",
+                        "format": "uuid"
+                    }
+                }
+            },
+            "ToppingCreateSchema": {
+                "title": "ToppingCreateSchema",
+                "required": [
+                    "name",
+                    "price",
+                    "description",
+                    "stock"
+                ],
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "title": "Name",
+                        "type": "string"
+                    },
+                    "price": {
+                        "title": "Price",
+                        "type": "number"
+                    },
+                    "description": {
+                        "title": "Description",
+                        "type": "string"
+                    },
+                    "stock": {
+                        "title": "Stock",
+                        "type": "integer"
+                    }
+                }
+            },
+            "ToppingListItemSchema": {
+                "title": "ToppingListItemSchema",
+                "required": [
+                    "id",
+                    "name",
+                    "price",
+                    "description"
+                ],
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "title": "Id",
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "title": "Name",
+                        "type": "string"
+                    },
+                    "price": {
+                        "title": "Price",
+                        "type": "number"
+                    },
+                    "description": {
+                        "title": "Description",
+                        "type": "string"
+                    }
+                }
+            },
+            "ToppingSchema": {
+                "title": "ToppingSchema",
+                "required": [
+                    "name",
+                    "price",
+                    "description",
+                    "stock",
+                    "id"
+                ],
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "title": "Name",
+                        "type": "string"
+                    },
+                    "price": {
+                        "title": "Price",
+                        "type": "number"
+                    },
+                    "description": {
+                        "title": "Description",
+                        "type": "string"
+                    },
+                    "stock": {
+                        "title": "Stock",
+                        "type": "integer"
+                    },
+                    "id": {
+                        "title": "Id",
+                        "type": "string",
+                        "format": "uuid"
+                    }
+                }
+            },
+            "UserCreateSchema": {
+                "title": "UserCreateSchema",
+                "required": [
+                    "username"
+                ],
+                "type": "object",
+                "properties": {
+                    "username": {
+                        "title": "Username",
+                        "type": "string"
+                    }
+                }
+            },
+            "UserSchema": {
+                "title": "UserSchema",
+                "required": [
+                    "username",
+                    "id"
+                ],
+                "type": "object",
+                "properties": {
+                    "username": {
+                        "title": "Username",
+                        "type": "string"
+                    },
+                    "id": {
+                        "title": "Id",
+                        "type": "string",
+                        "format": "uuid"
+                    }
+                }
+            },
+            "ValidationError": {
+                "title": "ValidationError",
+                "required": [
+                    "loc",
+                    "msg",
+                    "type"
+                ],
+                "type": "object",
+                "properties": {
+                    "loc": {
+                        "title": "Location",
+                        "type": "array",
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "integer"
+                                }
+                            ]
+                        }
+                    },
+                    "msg": {
+                        "title": "Message",
+                        "type": "string"
+                    },
+                    "type": {
+                        "title": "Error Type",
+                        "type": "string"
+                    }
+                }
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "user",
+            "description": "Operations with users. "
+        },
+        {
+            "name": "order",
+            "description": "Operations  with orders."
+        },
+        {
+            "name": "beverage",
+            "description": "Operations with beverages. "
+        },
+        {
+            "name": "pizza_type",
+            "description": "Operations with pizza_types. "
+        },
+        {
+            "name": "dough",
+            "description": "Operations with doughs. "
+        },
+        {
+            "name": "topping",
+            "description": "Operations with toppings. "
+        }
+    ]
+}

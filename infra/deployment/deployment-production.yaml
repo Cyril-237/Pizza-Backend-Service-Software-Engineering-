@@ -1,0 +1,75 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: productioncontainer-service
+  namespace: production
+spec:
+  type: NodePort
+  selector:
+    app: productioncontainer
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000
+      nodePort: 30081
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  namespace: production
+  labels:
+    app: productioncontainer
+  name: productioncontainer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: productioncontainer
+  strategy: { }
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: productioncontainer
+    spec:
+      containers:
+        - image: enter_release_containter_registry_url
+          name: release-container
+          env:
+            - name: DATABASE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: database-production
+                  key: username
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: database-production
+                  key: mysql-password
+            - name: DATABASE_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: database-production
+                  key: database
+            - name: DATABASE_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: database-production
+                  key: database-host
+            - name: DATABASE_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: database-production
+                  key: database-port
+            - name: DATABASE_TYPE
+              valueFrom:
+                secretKeyRef:
+                  name: database-production
+                  key: database-type
+          resources: { }
+          ports:
+            - containerPort: 8000
+      imagePullSecrets:
+        - name: regcred2
+status: { }

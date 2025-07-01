@@ -1,0 +1,7 @@
+{
+  "devDependencies": {
+    "@types/node": "^22.10.10",
+    "openapi-typescript": "^7.5.2",
+    "openapi-typescript-codegen": "^0.29.0"
+  }
+}

@@ -1,0 +1,53 @@
+[project]
+name = "1337_pizza"
+version = "2.0.0"
+description = "1337 Pizza is a pizza delivery company, that has specialized on the needs of nerds"
+authors = ["Dummy <dummy@dummy.com>"]
+license = "MIT"
+
+dependencies = [
+    "alembic==1.14.1",
+    "fastapi==0.115.8",
+    "flakeheaven==3.2.1",
+    "psycopg[binary]==3.2.5",
+    "python-dotenv==1.0.1",
+    "sqlalchemy==2.0.38",
+    "uvicorn==0.34.0",
+]
+
+[dependency-groups]
+dev = [
+    "coverage[toml]==7.6.12",
+    "mypy==1.15.0",
+    "pytest==7.2.2",
+    "pytest-cov==6.0.0",
+    "pytest-mock==3.14.0",
+    "ruff==0.9.7",
+    "tavern==2.11.0",
+]
+
+[tool.uv.pip]
+universal = true
+
+[tool.pytest.ini_options]
+minversion = "7.2.1"
+addopts = "--import-mode=importlib"
+
+[tool.ruff]
+line-length = 120
+src = ["app", "tests"]
+exclude = ["example.py", "setup.py", "README.rst", "app/database/migrations/"]
+
+[tool.ruff.format]
+quote-style = "single"
+
+[tool.ruff.lint]
+select = ["E", "F", "Q", "C", "PL"]
+# ignore = ["E611", "E1101", "E401", "E1102", "E1123"]
+
+[tool.ruff.lint.flake8-quotes]
+inline-quotes = "single"
+
+[tool.coverage.run]
+source = ["app"]
+omit = ["app/database/migrations/*"]
